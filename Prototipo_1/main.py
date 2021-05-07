@@ -1,16 +1,17 @@
 import classes as cs
 
-def main():
 
-    week_ = cs.week()
+#TO DO:
+#   - Manejar programa completo por consola
+#   - Hacer que imprima mas legible (aunque funciona tal como está)
 
-    # Añadir 2 materia a la semana
-    week_.addMateria()
-    week_.addMateria()
+# Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 
-    # Printear materias añadidas
-    week_.print_materias()
+week_ = cs.week()
 
+# Añadir 2 materia a la semana
+week_.addMateria()
+week_.addMateria()
 
-
-main()
+# Printear materias añadidas
+week_.print_materias()
