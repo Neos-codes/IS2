@@ -5,7 +5,7 @@ Created on Thu May 13 15:29:37 2021
 @author: caleu
 """
 
-API_KEY = "AIzaSyBSEdtpvFYNDRDTb4KOYnexhKQltmrax4Y"
+API_KEY = "your_API_Key_here"
 
 from googleapiclient.discovery import build
 import json
