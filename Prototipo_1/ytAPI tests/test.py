@@ -4,8 +4,9 @@ Created on Thu May 13 15:29:37 2021
 
 @author: caleu
 """
+from env import Env
 
-API_KEY = "AIzaSyBSEdtpvFYNDRDTb4KOYnexhKQltmrax4Y"
+API_KEY = Env.API_KEY
 
 from googleapiclient.discovery import build
 import json
