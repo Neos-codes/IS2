@@ -8,9 +8,6 @@ import classes as cs
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 week_ = cs.week()
 
-kk = list(range(7))
-print(kk)
-
 if week_.get_nMaterias() == 0:
     print("Bienvenido! Aun no ha agregado ninguna materia a su horario, ahora agregaremos una")
     week_.addMateria()
@@ -29,7 +26,7 @@ while 1:
             print("Opcion invalida, ingrese nuevamente")
 
     if option == 1:
-        week_.print_horario_completo()
+        week_.print_horario_completo()    # Revisar este metodo
     elif option == 2:
         week_.print_materias()
     elif option == 3:
@@ -38,13 +35,3 @@ while 1:
         week_.add_hora()
     else:
         exit()
-
-
-# Añadir 2 materia a la semana
-week_.addMateria()
-week_.addMateria()
-
-# Printear materias añadidas
-week_.print_materias()
-
-week_.add_hora()
