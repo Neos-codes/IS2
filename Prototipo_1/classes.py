@@ -27,10 +27,19 @@ class week:
     
     def addMateria(self):
         self.ramos.addMateria(self.days)
+
+    def add_hora(self):
+        self.ramos.add_hora_materia(self.days)
     
     def print_materias(self):
         print("Materias agregadas: ")
         self.ramos.print_materias()
+
+    def print_horario_completo(self):
+        self.ramos.print_dias([])
+
+    def get_nMaterias(self):
+        return self.ramos.get_nMaterias()
 
 # END CLASS WEEK
 
@@ -41,7 +50,7 @@ class materias():
         # Guardaremos las materias en un set
         self.materias_ = set()
 
-
+    # Metodo para añadir una materia
     def addMateria(self, dias: list):
         # Recibir nombre del ramo
         print("Nombre de la materia: ")
@@ -71,20 +80,45 @@ class materias():
             dias = c_dias.copy()
             self.materias_.add(name)
 
-    # END ADDMATERIA (EN CLASS MATERIA)
+    # Metodo para añadir horas en una materia existente
+    def add_hora_materia(self, days: list):
+        # Leer que materia queremos agregar
+        while 1:
+            print("A que materia le quieres agregar horas? (Ingresa el numero)")
+            mats = list(self.materias_)    # Pasamos el set a lista para obtener un index
+            self.print_materias()
+            num_mat = int(input())           # Pedimos el numero de la materia
+            
+            # Verificar entrada valida
+            if num_mat > (len(mats) + 1) or num_mat <= 0:  # Si no es valida, preguntar de nuevo
+                print("Ingrese un indice valido!")      
+                continue
+            else:                                # Si es valida, salir del while
+                break
 
+        mat_ = mats[num_mat - 1]         # guardamos el nombre en mat_
+        i = 1
+        print("Que dia quieres agregar las horas? (Ingresa el numero)")
+        # Imprimir los dias
+        for x in days_:
+            print(str(i) + ". " + x)
+            i += 1
+        # Recibir input
+        num_dia = int(input())
+        # Agregar hora
+        print("Ahora agregaré la hora!")
+        self.add_hora(mat_, days[num_dia - 1], num_dia - 1)
+
+    # Metodo para imprimir las materias por consola
     def print_materias(self):
         i = 1
-        for x in self.materias_:
+        mats = list(self.materias_)
+        for x in mats:
             mat = x
             print(str(i) + ". " + mat)
             i += 1
-    
-    # END PRINT_MATERIAS
 
-
-
-
+    # Metodo para añadir una hora de una materia en un día en especifico
     def add_hora(self, name_mat: str, dia: day, n_dia: int):
         # Permite agregar horas a self.hrs
         # Imprimir horario del dia en que se quiere agregar la materia
@@ -114,9 +148,7 @@ class materias():
             if hr == "N" or hr == "NO" or hr == "N".lower() or hr == "NO".lower():
                 break
 
-
-
-
+    # Metodo para imprimir los días de la semana
     def print_dias(self, dias_: list):
         
          # Mostrar dias en los que no ha ingresado aun la materia
@@ -135,5 +167,10 @@ class materias():
             # Si ya está ingresado, revisar el dia siguiente
             else:
                 continue
+
+    # Getters
+    def get_nMaterias(self):
+        print(len(list(self.materias_)))
+        return len(list(self.materias_))
 
 # END CLASS MATERIAS
