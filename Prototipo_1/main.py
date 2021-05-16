@@ -1,10 +1,6 @@
 import classes as cs
 
 
-#TO DO:
-#   - Manejar programa completo por consola    // IN PROGRESS
-#   - Arreglar metodo week.print_horario_completo()
-
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 week_ = cs.week()
 
@@ -26,7 +22,7 @@ while 1:
             print("Opcion invalida, ingrese nuevamente")
 
     if option == 1:
-        week_.print_horario_completo()    # Revisar este metodo
+        week_.print_horario()    # Revisar este metodo
     elif option == 2:
         week_.print_materias()
     elif option == 3:

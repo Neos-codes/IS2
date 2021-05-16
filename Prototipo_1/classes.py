@@ -35,8 +35,26 @@ class week:
         print("Materias agregadas: ")
         self.ramos.print_materias()
 
-    def print_horario_completo(self):
-        self.ramos.print_dias([])
+    def print_horario(self):
+        k = 0
+        for x in self.days:                              # Por cada dia de la semana
+            print(days_[k])
+            for i in range(14):                          # Por cada hora de ese dia
+                # Si no hay materias en esta hora, imprimir solo la hora
+                if len(x.hrs[i]) == 0:
+                    print(str(i + 8) + " hrs")
+                # Si hay materias en esta hora, imprimir todas las que hay
+                else:
+                    str_ = str(i + 8) + " hrs: "
+                    #print(str(i + 8) + "hrs ")
+                    for j in range(0, len(x.hrs[i])):    # Por cada materia en esa hora
+                        str_ += str(x.hrs[i][j])
+                        str_ += " "
+                    print(str_)
+            k += 1
+
+
+
 
     def get_nMaterias(self):
         return self.ramos.get_nMaterias()
@@ -167,6 +185,7 @@ class materias():
             # Si ya está ingresado, revisar el dia siguiente
             else:
                 continue
+
 
     # Getters
     def get_nMaterias(self):
