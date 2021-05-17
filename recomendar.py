@@ -1,102 +1,97 @@
 import random
+from copy import copy
 
-# esta funcion genera una duracion aleatoria en relacion al tipo de video pedido, es mas que nada para probar el algoritmo
-# tipo: tipo de duracion del video
-def GenerarVideo(tipo):
-	if tipo == "corto":#video corto
-		return random.randint(1,4)
-	elif tipo == "medio":#video medio
-		return random.randint(5,20)
-	elif tipo == "largo":#video largo
-		return random.randint(20,100)
-	else:#ninguno
-		print("por favor ingrese un tipo valido")
-		return -1
+def generar_video(tipo):
+    """
+    Retorna duracion aleatoria en una de las categorias ('corto', 'medio', 'largo').
 
-#elige un tag aleatorio del conjunto tags
-#tags: conjunto de tags
-#eliminar: variable booleana que dicide si el elemento elegido es borrado del conjunto
-def RandomTag(tags, eliminar):
+    Parameters
+    ----------
+    tipo : str
+        Uno de ('corto', 'medio', 'largo').
 
-	n = len(tags)#tamaño del conjunto
+    Raises
+    ------
+    ValueError
+        Si tipo no es uno de ('corto', 'medio', 'largo').
 
-	index = random.randint(0,n - 1)#eleccion aleatoria
+    Returns
+    -------
+    int
+        Duracion del video.
 
-	result = tags[index]#se obtiene el tag
-
-	if eliminar:
-		tags.remove(result)#se elimina del conjunto
-
-	return result
-
-#esta funcion corresponde al algortimo de recomendacion
-#tiempo: tiempo libre asignado
-#maxLargos: maximo numero de videos largos permitidos por el usuario
-#maxMedios: maximo numero de videos medios permitidos por el usuario
-#maxCortos: maximo numero de videos cortos permitidos por el usuario
-def Recomendar(tiempo, maxLargos, maxMedios, tags):
-	videos = []#donde se guardan los resultados
-
-	auxTag = []#auxiliar donde se guardan los tags que seran eliminados
-
-	for t in tags:
-		auxTag.append(t)#se guardan los tags en el auxiliar
-
-	#se inicializan contadores
-	numLargos = 0
-	numMedios = 0
-	numCortos = 0
-
-	#mientras haya tiempo para un video corto
-	while tiempo >= 4:
-
-		#se ve si se han puesto todos los tags al menos una vez
-		if len(auxTag) > 0:
-			tag = RandomTag(auxTag, True)
-		else:
-			tag = RandomTag(tags, False)
+    """
+    span_tipo = {"corto": (1, 4), "medio": (5, 20), "largo": (20, 100)}
+    try:
+        return random.randint(*span_tipo[tipo])
+    except KeyError:
+        raise ValueError(f"Tipo debe ser uno de {set(span_tipo.keys())}.")
 
 
-		videoAux = 0#auxiliar de duracion
+def random_tags(tags):
+    """
+    Genera una sequencia aleatoria de tags, con todos los tags apareciendo
+    a lo menos una vez antes de que cualquier tag se repita.
 
-		#si se puede agregar videos largos
-		if tiempo >= 100 and numLargos < maxLargos:
-			videoAux = GenerarVideo("largo")
-			numLargos += 1
+    Parameters
+    ----------
+    tags : sequencia de tags
 
-		#si se puede agregar videos medios
-		elif tiempo >= 20 and numMedios < maxMedios:
-			videoAux = GenerarVideo("medio")
-			numMedios += 1
+    Yields
+    ------
+    tag
 
-		#si se puede agregar videos cortos
-		else:
-			videoAux = GenerarVideo("corto")
+    """
 
-		tiempo -= videoAux#se reduce el tiempo restante
+    tags = copy(tags)
+    random.shuffle(tags)
+    yield from tags
+    while True:
+        yield random.choice(tags)
 
-		video = tag + " " + str(videoAux)
+def recomendar(tiempo, maxLargos, maxMedios, tags):
+    """
+    Genera hasta (maxLargos) videos de duracion larga,
+    seguido de hasta (maxMedios) videos de duracion media y
+    cuantos videos de duracion corta sean necesarios
+    para acumular (tiempo - max_d_corta, tiempo].
 
-		videos.append(video)#se agrega el video al resultado
+    Parameters
+    ----------
+    tiempo : int
+        Duracion objetivo de la suma de los videos.
+    maxLargos : int
+        Maximo numero de videos largos.
+    maxMedios : int
+        Maximo numero de videos medios.
+    tags : int
+        Tags para los videos.
 
-	return videos
+    Yields
+    ------
+    str
+        Video con tag aleatorio y duracion aleatoria.
 
-def Main():
-	#se piden datos al usuario
-	tiempo = int(input("introduzca una cantidad de tiempo (en minutos)\n"))
+    """
+    tags_gen = random_tags(tags)
+    tdc_seq = [('largo', maxLargos, 100),
+               ('medio', maxMedios, 20),
+               ('corto', float('inf'), 4)]
 
-	maxLargos = int(input("elija la cantidad de videos largos maximos que quiere\n"))
+    for tipo, cantidad, max_d in tdc_seq:
+        while cantidad > 0 and tiempo > max_d:
+            tag = next(tags_gen)
+            d = generar_video(tipo)
+            cantidad -= 1
+            tiempo -= d
+            yield f"{tag} {d}"
 
-	maxMedios = int(input("elija la cantidad de videos medios maximos que quiere\n"))
+def main():
+    tiempo = int(input("Introduzca una cantidad de tiempo (en minutos)\n"))
+    maxLargos = int(input("Elija la cantidad de videos largos maximos que quiere\n"))
+    maxMedios = int(input("Elija la cantidad de videos medios maximos que quiere\n"))
+    tags = input("Ponga sus tags separados por espacio\n").split()
+    print(list(recomendar(tiempo, maxLargos, maxMedios, tags)))
 
-	tags = input("ponga sus tags separados por espacio\n")
-
-	tags = tags.split()
-
-	listaVideos = Recomendar(tiempo, maxLargos, maxMedios, tags)
-
-	print(listaVideos)
-
-Main()
-
-
+if __name__ == "__main__":
+    main()
