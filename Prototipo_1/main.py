@@ -10,7 +10,7 @@ def main():
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
-        if operation:
+        if callable(operation):
             operation(week)
         else:
             if save(week):

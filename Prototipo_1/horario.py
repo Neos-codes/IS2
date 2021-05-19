@@ -1,5 +1,9 @@
+from inspect import ArgInfo
 from pickle import load, dump
 from os.path import exists
+from recomendar import recomendar_un_video
+import time
+import random
 
 
 DAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
@@ -16,6 +20,8 @@ class Horario:
             self._sorted_mats.append(materia)
             self._sorted_mats.sort(key=self._mat_order)
             self._materias.add(materia)
+            return 1
+        return 0
     def __getitem__(self, index):
         return self._sorted_mats[index]
     def __len__(self):
@@ -31,19 +37,25 @@ class Day:
         self.hrs = [Horario(self, i, mat_order) for i in range(8, 22)]
         self.week = week
         self.name = name
-        self.choices_horario = [(horario, None) for horario in self.hrs]
+        self._choices_horario = [(horario, None) for horario in self.hrs]
+    @property
+    def choices_horario(self):
+        return self._choices_horario.copy()
     def __str__(self):
         return self.name + "\n" + "\n".join(map(str, self.hrs))
+    def __bool__(self):
+        return any(self.hrs)
     def generate_recomendations(self):
         raise NotImplementedError
 
 class Week:
     def __init__(self):
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
-        self.materias = set()
+        self.materias = dict()
         self._mats_order = list()
-        self.choices_materia = []
-        self.choices_day = [(day, day.name) for day in self.days]
+        self._choices_materia = []
+        self._choices_day = [(day, day.name) for day in self.days]
+
     def __str__(self):
         w_col = max(len(word) for i in [self.materias, DAYS] for word in i)
         row_template = "{: >6} " + " ".join([f"{{: ^{w_col}}}"] * 7)
@@ -58,17 +70,75 @@ class Week:
                 lines.append(row_template.format(row_head, *hrs_row))
         return '\n'.join(lines)
 
+    def __bool__(self):
+        return any(self.days) or self.materias
+
+    def get_video_recomendation_for_time(self, dia, hora, minutos):
+        if isinstance(dia, Day):
+            day = dia
+        else:
+            day = self.days[dia]
+        t = int(60 - minutos)
+        if isinstance(hora, Horario):
+            i = hora.time - 8
+            horario = hora
+        else:
+            i = hora - 8
+            horario = day.hrs[i]
+        if horario:
+            materias = list(horario)
+            materia = random.choices(materias, weights=[self.materias[m] for m in materias])[0]
+            for h in day.hrs[i + 1:]:
+                if materia in h:
+                    t += 60
+                else:
+                    break
+            return recomendar_un_video(materia, tiempo=t)
+
+    def week_iterator(self, day=None, horario=None):
+        if isinstance(day, Day):
+            i = self.days.index(day)
+        elif day is None:
+            i = 0
+        else:
+            i = day
+        if isinstance(horario, Horario):
+            assert day is None
+            j = horario.time - 8
+        elif horario is None:
+            j = 0
+        else:
+            j = horario - 8
+        start = (i, j)
+        j += 1
+        i += j // 14
+        j = j % 14
+        i = i % 7
+        while (i, j) != start:
+            yield self.days[i].hrs[j]
+            j += 1
+            i += j // 14
+            j = j % 14
+            i = i % 7
+
+    @property
+    def choices_materia(self):
+        return [(0, "Nueva materia.")] + self._choices_materia
+
+    @property
+    def choices_day(self):
+        return self._choices_day.copy()
+
     def get_mats_order(self, materia):
         return self._mats_order.index(materia)
 
-    def add_materia(self, materia):
+    def add_materia(self, materia, horario=None):
         if materia not in self.materias:
-            self.materias.add(materia)
+            self.materias[materia] = 0
             self._mats_order.append(materia)
-            self.choices_materia.append((materia, materia))
-    @property
-    def ramos(self):
-        return 
+            self._choices_materia.append((materia, materia))
+        if horario is not None:
+            self.materias[materia] += horario.add(materia)
 
 
 def check_save(save_path="week.pickle"):

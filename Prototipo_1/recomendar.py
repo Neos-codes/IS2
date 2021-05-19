@@ -50,7 +50,7 @@ def random_tags(tags):
     while True:
         yield random.choice(tags)
 
-def recomendar_prueva(tiempo, maxLargos, maxMedios, tags):
+def recomendar_prueba(tiempo, maxLargos, maxMedios, tags):
     """
     Genera hasta (maxLargos) videos de duracion larga,
     seguido de hasta (maxMedios) videos de duracion media y
@@ -101,9 +101,31 @@ def recomendar(tiempo, materias):
                 video_gen[materia] = ytAPI.video_search_gen(busqueda = materia, duracion = tipo)
             video = next(video_gen[materia])
             d = ytAPI.get_video_duration(video)
-            cantidad -= 1
-            tiempo -= d
-            yield video
+            if (yield video):
+                cantidad -= 1
+                tiempo -= d
+
+def tiempo_a_duracion(tiempo):
+    if tiempo is None:
+        return None
+    if tiempo > 40:
+        return "long"
+    elif tiempo > 20:
+        return "medium"
+    elif tiempo > 4:
+        return "short"
+    else:
+        return None
+
+def recomendar_un_video(materia, tiempo=None):
+    d = tiempo_a_duracion(tiempo)
+    while True:
+        video = next(ytAPI.video_search(materia, duracion=d))
+        if tiempo is None or video['duration'] <= tiempo:
+            video['materia'] = materia
+            return video
+
+
 
 def main():
     tiempo = int(input("Introduzca una cantidad de tiempo (en minutos)\n"))
