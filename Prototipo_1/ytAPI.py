@@ -47,7 +47,9 @@ def video_search_gen(busqueda, duracion=None):
         while True:
             videos = res['items']
             durations = get_durations(videos)
-            yield from (v | {"duration": d} for v, d in zip(videos, durations))
+            for v, d in zip(videos, durations):
+                v['duration'] = d
+                yield v
             req = search.list_next(req, res)
             res = req.execute()
 
