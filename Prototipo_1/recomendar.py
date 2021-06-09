@@ -117,12 +117,14 @@ def tiempo_a_duracion(tiempo):
     else:
         return None
 
-def recomendar_un_video(materia, tiempo=None):
+def recomendar_un_video(materia, vistos, tiempo=None):
+    lista=vistos.getVistos()
     d = tiempo_a_duracion(tiempo)
     while True:
         video = next(ytAPI.video_search(materia, duracion=d))
-        if tiempo is None or video['duration'] <= tiempo:
+        if (tiempo is None or video['duration'] <= tiempo) and video not in lista:
             video['materia'] = materia
+            vistos.add(video)
             return video
 
 
@@ -136,3 +138,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

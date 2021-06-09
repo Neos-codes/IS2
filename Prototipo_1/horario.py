@@ -73,7 +73,7 @@ class Week:
     def __bool__(self):
         return any(self.days) or self.materias
 
-    def get_video_recomendation_for_time(self, dia, hora, minutos):
+    def get_video_recomendation_for_time(self, dia, hora, minutos, vistos):
         if isinstance(dia, Day):
             day = dia
         else:
@@ -93,7 +93,7 @@ class Week:
                     t += 60
                 else:
                     break
-            return recomendar_un_video(materia, tiempo=t)
+            return recomendar_un_video(materia, vistos, tiempo=t)
 
     def week_iterator(self, day=None, horario=None):
         if isinstance(day, Day):
@@ -155,3 +155,4 @@ def save(week, save_path="week.pickle"):
         return True
     except:
         return False
+

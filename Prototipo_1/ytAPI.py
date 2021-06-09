@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 13 15:29:37 2021
-
-@author: caleu
-"""
 from googleapiclient.discovery import build
 import re
 

@@ -1,6 +1,7 @@
 from recomendar import recomendar_un_video
 import horario
 import time
+import vistos
 
 
 def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrece opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
@@ -80,37 +81,7 @@ def add_materia_to_horario(week: horario.Week, materia=None):
             else:
                 week.add_materia(materia, horario)
 
-
-def get_video(week: horario.Week):
-    if not week:
-        video = recomendar_un_video(new_materia(week))
-    datetime = time.struct_time(time.localtime())
-    video = week.get_video_recomendation_for_time(datetime.tm_wday, datetime.tm_hour, datetime.tm_min)
-    while video is None:
-        choice = choose_from([(0, "Hora mas proxima."), (1, "Hora especifica."), (2, "Materia especifica.")],
-                            prompt_choices="No tiene ninguna materia registrada a esta hora. Desea una recomendacion para: ")
-        if choice == -1:
-            return
-        elif choice == 0:
-            horario = next(filter(None, week.week_iterator(day=datetime.tm_wday, horario=datetime.tm_hour)))
-            video = week.get_video_recomendation_for_time(horario.day, horario, 0)
-        elif choice == 1:
-            while video is None:
-                day = choose_from(filter(lambda x: x[0], week.choices_day), prompt_choices="Dia:")
-                if day == -1:
-                    break
-                while video is None:
-                    horario = choose_from(filter(lambda x: x[0], day.choices_horario), prompt_choices="Hora:")
-                    if horario == -1:
-                        break
-                    video = week.get_video_recomendation_for_time(day, horario, 0)
-        elif choice == 2:
-            materia = choose_from(week.choices_materia)
-            if materia == -1:
-                continue
-            elif materia == 0:
-                materia = new_materia(week)
-            video = recomendar_un_video(materia)
+def print_video(video):
     print()
     print("Materia:", video["materia"])
     print(video['snippet']['title'])
@@ -120,12 +91,55 @@ def get_video(week: horario.Week):
     print(f"Url: https://www.youtube.com/watch?v={video['id']['videoId']}")
     print()
 
+def get_video(week: horario.Week, vistos: vistos.ListaVistos):
+    if not week:
+        video = recomendar_un_video(new_materia(week), vistos)
+    datetime = time.struct_time(time.localtime())
+    video = week.get_video_recomendation_for_time(datetime.tm_wday, datetime.tm_hour, datetime.tm_min, vistos)
+    while video is None:
+        choice = choose_from([(0, "Hora mas proxima."), (1, "Hora especifica."), (2, "Materia especifica.")],
+                            prompt_choices="No tiene ninguna materia registrada a esta hora. Desea una recomendacion para: ")
+        if choice == -1:
+            return
+        elif choice == 0:
+            horario = next(filter(None, week.week_iterator(day=datetime.tm_wday, horario=datetime.tm_hour)))
+            video = week.get_video_recomendation_for_time(horario.day, horario, 0, vistos)
+        elif choice == 1:
+            while video is None:
+                day = choose_from(filter(lambda x: x[0], week.choices_day), prompt_choices="Dia:")
+                if day == -1:
+                    break
+                while video is None:
+                    horario = choose_from(filter(lambda x: x[0], day.choices_horario), prompt_choices="Hora:")
+                    if horario == -1:
+                        break
+                    video = week.get_video_recomendation_for_time(day, horario, 0, vistos)
+        elif choice == 2:
+            materia = choose_from(week.choices_materia)
+            if materia == -1:
+                continue
+            elif materia == 0:
+                materia = new_materia(week)
+            video = recomendar_un_video(materia, vistos)
+    print_video(video)
+
+def print_vistos(vistos: vistos.ListaVistos):
+    lista = vistos.getVistos()
+    print()
+    if not lista:
+        print("No hay videos vistos.")
+    else:
+        for video in lista:
+            print_video(video)
+    print()
 
 MAIN_MENU = {"choices": [(print_horario, "Ver mi horario."),
                          (print_materias, "Ver mis materias."),
                          (add_horario_to_materia, "Añadir horas a materias."),
                          (add_materia_to_horario, "Añadir materias a horas."),
-                         (get_video, "Recibir recomendacion de video.")],
+                         (get_video, "Recibir recomendacion de video."),
+                         (print_vistos, "Ver videos vistos.")],
              "prompt_choices": "¿Que desea hacer?",
              "prompt_input": "(Ingrese numero):",
              "prompt_go_back": "Salir"}
+

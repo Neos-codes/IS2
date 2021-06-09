@@ -1,4 +1,5 @@
 from horario import Week, DAYS, check_save, load_save, save
+from vistos import ListaVistos
 import ui
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
@@ -7,11 +8,17 @@ def main():
         week = load_save()
     else:
         week = Week()
+    vistos = ListaVistos()
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
         if callable(operation):
-            operation(week)
+            if(operation==ui.get_video):
+                operation(week, vistos)
+            elif(operation==ui.print_vistos): 
+                operation(vistos)
+            else:
+                operation(week)
         else:
             if save(week):
                 print("El programa a terminado exitosamente.")
