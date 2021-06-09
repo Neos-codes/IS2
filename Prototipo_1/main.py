@@ -1,4 +1,4 @@
-afrom horario import Week, DAYS, check_save, load_save, save
+from horario import Week, DAYS, check_save, load_save, save
 from vistos import ListaVistos
 import ui
 

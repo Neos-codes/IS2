@@ -1,4 +1,4 @@
-aimport random
+import random
 import ytAPI
 from copy import copy
 

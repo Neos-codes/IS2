@@ -1,4 +1,4 @@
-afrom inspect import ArgInfo
+from inspect import ArgInfo
 from pickle import load, dump
 from os.path import exists
 from recomendar import recomendar_un_video

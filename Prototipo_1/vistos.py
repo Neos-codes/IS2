@@ -1,4 +1,4 @@
-a
+
 class ListaVistos:
     def __init__(self):
         self.vistos = list()
