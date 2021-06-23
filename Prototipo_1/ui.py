@@ -169,7 +169,7 @@ def create_option_buttons(horario_f, options_f, week, gadgets, vistos):
     favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: print("Mostrar videos favoritos"))
     favoritos.grid(row = 3, column = 0)
 
-def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrece opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
+def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrese opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
     print(prompt_choices)
     if not isinstance(choices, list):
         choices = list(choices)

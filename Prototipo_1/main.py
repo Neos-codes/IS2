@@ -2,21 +2,6 @@ from horario import Week, DAYS, check_save, load_save, save
 from vistos import ListaVistos
 import ui
 
-# Esto es un test para mostrar info en el horario, borrar eventualmente
-# TO DO: Borrar esto al finalizar tests
-def test():
-    hrs_days = []
-
-    for i in range(7):
-        hrs_days.append([])
-        for j in range(13):
-            if j % 2 == 0:
-                hrs_days[i].append(None)
-            else:
-                hrs_days[i].append("nombre_materia")
-    
-    return hrs_days
-
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 def main():
