@@ -3,6 +3,7 @@ import horario
 import time
 import vistos
 import tkinter as tk
+from tkinter import messagebox
 import webbrowser 
 
 from PIL import Image, ImageTk
@@ -37,7 +38,9 @@ def asignar_hora(dia: int, hora: int, materia: str, week):
     hr = week.days[dia].hrs[hora]
     hr._sorted_mats.clear()
     hr._materias.clear()
-    hr.add(materia)
+    # Si la materia no es "vacio" ("---""), agregar
+    if materia != "---":
+        hr.add(materia)
 
 def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     # Obtener lista de materias ya agregadas
@@ -84,6 +87,8 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
             x.clear() 
         gadgets.clear()
 
+    if not "---" in materias:
+        materias.append("---")
     # Crear optionMenus nuevos
     for i in range(7):
         gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
