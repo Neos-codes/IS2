@@ -93,14 +93,14 @@ class Week:
             i = hora - 8
             horario = day.hrs[i]
         if horario:
-            materias = list(horario)
-            materia = random.choices(materias, weights=[self.materias[m] for m in materias])[0]
+            materia = list(horario)
+            # materia = random.choices(materias, weights=[self.materias[m] for m in materias])[0]
             for h in day.hrs[i + 1:]:
                 if materia in h:
                     t += 60
                 else:
                     break
-            return recomendar_un_video(materia, vistos, tiempo=t)
+            return recomendar_un_video(materia[0], vistos, tiempo=t)
 
     def week_iterator(self, day=None, horario=None):
         if isinstance(day, Day):

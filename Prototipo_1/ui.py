@@ -110,7 +110,7 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
             new_options.grid(row = j + 1, column = i + 1)
 
 # Rellenar horas del horario
-def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list, hrs_days: list):
+def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list):
     # Agregar materias a la lista "materias"
     materias = []
     for x in week.choices_materia[1:]:
