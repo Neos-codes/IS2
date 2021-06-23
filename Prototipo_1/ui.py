@@ -284,6 +284,34 @@ def get_video(week: horario.Week, vistos: vistos.ListaVistos):
     #print_video(video)
     return video
 
+def get_video_b(week: horario.Week, vistos: vistos.ListaVistos):
+    '''
+    Esta funcion es una copia de get_video() para poder hacerle cambios 
+    libremente sin alterar el funcionamiento del resto del programa.
+    Es una version simplificada que no da opciones para agregar materias 
+    en caso de que no haya ninguna asignada para el momento.
+    Por ahora esta funcion solo es utilizada en ver_videos_recomendados().
+    
+    Parameters
+    ----------
+    week : horario.Week
+        DESCRIPTION.
+    vistos : vistos.ListaVistos
+        DESCRIPTION.
+
+    Returns
+    -------
+    video : TYPE
+        DESCRIPTION.
+
+    '''
+    if not week:
+        return None
+    datetime = time.struct_time(time.localtime())
+    video = week.get_video_recomendation_for_time(datetime.tm_wday, datetime.tm_hour, datetime.tm_min, vistos)
+    #print_video(video)
+    return video
+
 def print_vistos(vistos: vistos.ListaVistos):
     lista = vistos.getVistos()
     print()
@@ -295,12 +323,15 @@ def print_vistos(vistos: vistos.ListaVistos):
     print()
 
 def ver_videos_recomendados(week, vistos):
-    newWindow = tk.Toplevel()
+    video = get_video_b(week, vistos)
+    if video is None:
+        tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
+        return
     
+    newWindow = tk.Toplevel()
     newWindow.title("Videos recomendados")
     newWindow.geometry("600x400")
-    video = get_video(week, vistos)
-    
+        
     title = tk.Label(newWindow, text="Recomendación de hoy:")
     title.pack()
     
@@ -321,7 +352,7 @@ def ver_videos_recomendados(week, vistos):
     label1.pack()
     
     button = tk.Button(newWindow, text="Play", 
-                       command=lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
+                       command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     button.pack()
 
 MAIN_MENU = {"choices": [(print_horario, "Ver mi horario."),
