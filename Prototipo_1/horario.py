@@ -12,10 +12,11 @@ class Horario:
     # Constructor
     def __init__(self, day, time, mat_order) -> None:
         self._materias = set()
-        self._sorted_mats = list()
+        self._sorted_mats = list() # Por aqui sacar las materias asignadas a la hora
         self._mat_order = mat_order
         self.day = day
         self.time = time
+    
     # Añadir materias
     def add(self, materia):
         if materia not in self._materias:
@@ -40,9 +41,10 @@ class Day:
         self.hrs = [Horario(self, i, mat_order) for i in range(8, 22)]
         self.week = week
         self.name = name
+        # Para ui
         self._choices_horario = [(horario, None) for horario in self.hrs]
     @property
-    def choices_horario(self):
+    def choices_horario(self):  # Si quiero leer los días, entro por acá "choices_horario"
         return self._choices_horario.copy()
     def __str__(self):
         return self.name + "\n" + "\n".join(map(str, self.hrs))
@@ -52,6 +54,7 @@ class Day:
         raise NotImplementedError
 
 class Week:
+
     def __init__(self):
         # Llenar un arreglo de dias en la semana
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
@@ -150,13 +153,14 @@ def check_save(save_path="week.pickle"):
 
 
 def load_save(save_path="week.pickle"):
-    return load(open(save_path, "rb"))
-
+    with open(save_path, "rb") as file:
+        return load(file)
 
 def save(week, save_path="week.pickle"):
     try:
-        dump(week, open(save_path, "wb"))
-        return True
+        with open(save_path, "wb") as file:
+            dump(week, file)
+            return True
     except:
         return False
 

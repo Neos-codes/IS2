@@ -34,7 +34,7 @@ def main():
     frames = {}
     
     # Aqui van los gadgets de la matriz horarios
-    h_gadgets = []   # TO DO: Creo que no es necesario guardar los botones ni el texto
+    h_gadgets = []
     
     # Aqui los labels de los días y las horas del horario
     labels_days = []
@@ -53,7 +53,8 @@ def main():
     ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs, hrs_days)
 
     # Crear botones de opciones
-    ui.create_option_buttons(frames["opciones"], week, vistos)
+
+    ui.create_option_buttons(frames["opciones"], week, h_gadgets, vistos)
 
     # Loop de ejecución de la ventana
     w.mainloop()
