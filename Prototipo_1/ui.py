@@ -3,6 +3,13 @@ import horario
 import time
 import vistos
 import tkinter as tk
+import webbrowser 
+
+from PIL import Image, ImageTk
+from urllib.request import urlopen
+from io import BytesIO
+
+#from ytAPI import video_search
 
 days_names = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 hours_day = list(range(8, 21))
@@ -71,12 +78,12 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
 
 # Botones para añadir materia, ver historia, etc
 # TO DO: Terminar las funciones lambda
-def create_option_buttons(frame):
+def create_option_buttons(frame, week, vistos):
     # Añadir materia
     new_materia = tk.Button(frame, text = "Añadir Materia", command = lambda: print("Nueva materia añadida"))
     new_materia.grid(row = 0, column = 0)
     # Recomendar
-    recomendar = tk.Button(frame, text = "Ver videos recomendados", command = lambda: print("Ver videos recomendados"))
+    recomendar = tk.Button(frame, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, vistos))
     recomendar.grid(row = 1, column = 0)
     # Historial
     historial = tk.Button(frame, text = "Ver historial", command = lambda: print("Ver historial"))
@@ -202,7 +209,8 @@ def get_video(week: horario.Week, vistos: vistos.ListaVistos):
             elif materia == 0:
                 materia = new_materia(week)
             video = recomendar_un_video(materia, vistos)
-    print_video(video)
+    #print_video(video)
+    return video
 
 def print_vistos(vistos: vistos.ListaVistos):
     lista = vistos.getVistos()
@@ -213,6 +221,36 @@ def print_vistos(vistos: vistos.ListaVistos):
         for video in lista:
             print_video(video)
     print()
+
+def ver_videos_recomendados(week, vistos):
+    newWindow = tk.Toplevel()
+    
+    newWindow.title("Videos recomendados")
+    newWindow.geometry("600x400")
+    video = get_video(week, vistos)
+    
+    title = tk.Label(newWindow, text="Recomendación de hoy:")
+    title.pack()
+    
+    #print(video['snippet']['thumbnails']['default']['url'])
+    u = urlopen(video['snippet']['thumbnails']['default']['url'])
+    raw_data = u.read()
+    u.close()
+    #print(raw_data)
+    
+    img = Image.open(BytesIO(raw_data))
+    #img = img.resize((250, 250))
+    img = ImageTk.PhotoImage(img)
+    thumbnail_label = tk.Label(newWindow, image=img)
+    thumbnail_label.image = img
+    thumbnail_label.pack()
+
+    label1 = tk.Label(newWindow, text=video['snippet']['title'])
+    label1.pack()
+    
+    button = tk.Button(newWindow, text="Play", 
+                       command=lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
+    button.pack()
 
 MAIN_MENU = {"choices": [(print_horario, "Ver mi horario."),
                          (print_materias, "Ver mis materias."),

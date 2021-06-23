@@ -75,7 +75,7 @@ class Week:
         return '\n'.join(lines)
 
     def __bool__(self):
-        return any(self.days) or self.materias
+        return any(self.days) or any(self.materias)
 
     def get_video_recomendation_for_time(self, dia, hora, minutos, vistos):
         if isinstance(dia, Day):
