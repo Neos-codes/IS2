@@ -47,9 +47,8 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     
     # Esta funcion se llama desde el boton de "aceptar"
     def isInMaterias(materias: list, new_mat: tk.Entry, week: horario.Week, window: tk.Toplevel):
-        if not new_mat in materias:
-            print(new_mat.get())
-            temp_str = new_mat.get()
+        temp_str = new_mat.get()
+        if not temp_str in materias:
             week.add_materia(temp_str)
             materias.append(temp_str)
             # Aqui hacer update de los optionMenu
