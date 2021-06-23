@@ -26,17 +26,59 @@ def create_frames(window, frames: dict):
     options.grid(row = 0, column = 0)
     frames["opciones"] = options
 
-def asignar_hora(dia: int, hora: int, materia: str):
-    #print("EN CONSTRUCCION dia:" + str(days_names[dia - 1]) + "hora:" + str(hora + 7) + "materia:" + materia)
-    print(dia)
-    print(hora)
-    print(materia)
+def asignar_hora(dia: int, hora: int, materia: str, week):
+    hr = week.days[dia].hrs[hora]
+    hr._sorted_mats.clear()
+    hr._materias.clear()
+    hr.add(materia)
+
+def addMateria(week: horario.Week, gadgets: list):
+    # Obtener lista de materias ya agregadas
+    materias = []
+    for x in week.choices_materia[1:]:
+        materias.append(x[0])
+    
+    def isInMaterias(materias: list, new_mat: tk.Entry, week: horario.Week, window: tk.Toplevel):
+        if not new_mat in materias:
+            print(new_mat.get())
+            temp_str = new_mat.get()
+            week.add_materia(temp_str)
+            materias.append(temp_str)
+            """
+            for columns in gadgets:
+                for hr in columns:
+                    hr.configure(*materias)
+            """
+            window.destroy()
+
+        else:
+            tk.messagebox.showerror("Error!", "La materia ya existe")
+
+    # Crear nueva ventana
+    top = tk.Toplevel()
+    top.title("Añadir materia")
+    
+    # Label
+    label = tk.Label(top, text = "Ingrese el nombre de la nueva materia:")
+    label.grid(row = 0, column = 0)
+    
+    # Añadir input field
+    e = tk.Entry(top, width = 30)
+    e.grid(row = 1, column = 0)
+    
+    # Añadir boton de aceptar
+    btn = tk.Button(top, text = "Aceptar", command = lambda: isInMaterias(materias, e, week, top))
+    btn.grid(row = 2, column = 0)
 
 # Rellenar horas del horario
 # TO DO: AÑADIR NUEVO PARAMETRO PARA SACAR LOS NOMBRE DE LAS MATERIAS EN LA HORA DEL DIA
 def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list, hrs_days: list):
-    # Agregar opcion "Asignar" a las materias para el boton de opciones
-    materias = week._mats_order + ["---"]
+    # Agregar materias a la lista "materias"
+    materias = []
+    for x in week.choices_materia[1:]:
+        materias.append(x[0])
+    materias += ["---"]
+
     
     # Crear labels de los días en el horario
     for i in range(7):
@@ -54,26 +96,22 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
         gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
         for j in range(13):  # Por cada hora del día "i"
             # Si en hrs_days hay un "None", se coloca el boton agregar
-            if hrs_days[i][j] == None:
-                clicked = tk.StringVar()
-                clicked.set(materias[len(materias) - 1].title())
-                foo = lambda materia = clicked.get(), dia = i + 1, hr = j + 1: asignar_hora(dia, hr, materia)
-                new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
-                gadgets[i].append(new_options)
-                new_options.grid(row = j + 1, column = i + 1)
-            # Si hay una materia, se coloca el nombre de la materia
-            # TO DO: Aqui deberiamos reemplazar materia por el nombre de la materia en la hora del dia
+            clicked = tk.StringVar()
+            if not week.days[i].hrs[j]:
+                clicked.set(materias[len(materias) - 1])
             else:
-                new_text = tk.Label(frame, text = "Materia", padx = 5, pady = 8)  # Completar
-                gadgets[i].append(new_text)
-                new_text.grid(row = j + 1, column = i + 1)
+                clicked.set(week.days[i].hrs[j][0])
+            foo = lambda materia = clicked.get(), dia = i, hr = j: asignar_hora(dia, hr, materia, week)
+            new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
+            gadgets[i].append(new_options)
+            new_options.grid(row = j + 1, column = i + 1)
 
 
 # Botones para añadir materia, ver historia, etc
 # TO DO: Terminar las funciones lambda
-def create_option_buttons(frame):
+def create_option_buttons(frame, week, gadgets):
     # Añadir materia
-    new_materia = tk.Button(frame, text = "Añadir Materia", command = lambda: print("Nueva materia añadida"))
+    new_materia = tk.Button(frame, text = "Añadir Materia", command = lambda: addMateria(week, gadgets))
     new_materia.grid(row = 0, column = 0)
     # Recomendar
     recomendar = tk.Button(frame, text = "Ver videos recomendados", command = lambda: print("Ver videos recomendados"))

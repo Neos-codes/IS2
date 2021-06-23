@@ -54,6 +54,7 @@ class Day:
         raise NotImplementedError
 
 class Week:
+
     def __init__(self):
         # Llenar un arreglo de dias en la semana
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
@@ -152,13 +153,14 @@ def check_save(save_path="week.pickle"):
 
 
 def load_save(save_path="week.pickle"):
-    return load(open(save_path, "rb"))
-
+    with open(save_path, "rb") as file:
+        return load(file)
 
 def save(week, save_path="week.pickle"):
     try:
-        dump(week, open(save_path, "wb"))
-        return True
+        with open(save_path, "wb") as file:
+            dump(week, file)
+            return True
     except:
         return False
 
