@@ -17,9 +17,10 @@ def test():
 
     return hrs_days
 
-def graphical_ui(week, vistos):
+def graphical_ui(week):
     # ----- Ventana ----- #
 
+    vistos = week.get_vistos()
     # Aqui iran los frames
     frames = {}
 
@@ -51,11 +52,14 @@ def graphical_ui(week, vistos):
     # ----- END VENTANA ----- #
 
 
-def cmd_ui(week, vistos):
+def cmd_ui(week):
+    vistos = week.get_vistos()
+
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
-        if(operation==ui.print_vistos): 
+        if callable(operation):
+            if operation == ui.print_vistos: 
                 operation(week.get_vistos())
             else:
                 operation(week)
@@ -76,12 +80,12 @@ def main(gui=None):
         week = Week()
 
     if gui is True:
-        return graphical_ui(week, vistos)
+        return graphical_ui(week)
     if gui is False:
-        return cmd_ui(week, vistos)
+        return cmd_ui(week)
     if gui is None:
         try:
-            return graphical_ui(week, vistos)
+            return graphical_ui(week)
         except Exception:
             return cmd_ui
         finally:
