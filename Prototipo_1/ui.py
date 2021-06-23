@@ -2,7 +2,88 @@ from recomendar import recomendar_un_video
 import horario
 import time
 import vistos
+import tkinter as tk
 
+days_names = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
+hours_day = list(range(8, 21))
+
+# Crear ventana
+def create_window():
+    window = tk.Tk()
+    window.title("Prototipo")   # Aqui debería ir el nombre del SW
+
+    return window
+
+# Crear Frames
+def create_frames(window, frames: dict):
+    # Para el horario
+    horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
+    horario.grid(row = 0, column = 1)
+    frames["horario"] = horario
+
+    # Para los botones de opciones
+    options = tk.LabelFrame(window, text = "Opciones", padx = 5, pady = 5)
+    options.grid(row = 0, column = 0)
+    frames["opciones"] = options
+
+def asignar_hora(dia: int, hora: int, materia: str):
+    #print("EN CONSTRUCCION dia:" + str(days_names[dia - 1]) + "hora:" + str(hora + 7) + "materia:" + materia)
+    print(dia)
+    print(hora)
+    print(materia)
+
+# Rellenar horas del horario
+# TO DO: AÑADIR NUEVO PARAMETRO PARA SACAR LOS NOMBRE DE LAS MATERIAS EN LA HORA DEL DIA
+def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list, hrs_days: list):
+    # Agregar opcion "Asignar" a las materias para el boton de opciones
+    materias = week._mats_order + ["Asignar"]
+    
+    # Crear labels de los días en el horario
+    for i in range(7):
+        new_label = tk.Label(frame, text = days_names[i], padx = 30, pady = 10)
+        labels_days.append(new_label)
+        new_label.grid(row = 0, column = i + 1)
+    
+    # Crear labels de las horas en el horario
+    for i in range(13):
+        new_label = tk.Label(frame, text = str(hours_day[i]), padx = 5, pady = 8)
+        labels_hrs.append(new_label)
+        new_label.grid(row = i + 1, column = 0)
+
+    for i in range(7):
+        gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
+        for j in range(13):  # Por cada hora del día "i"
+            # Si en hrs_days hay un "None", se coloca el boton agregar
+            if hrs_days[i][j] == None:
+                clicked = tk.StringVar()
+                clicked.set(materias[len(materias) - 1].title())
+                foo = lambda materia = clicked.get(), dia = i + 1, hr = j + 1: asignar_hora(dia, hr, materia)
+                new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
+                gadgets[i].append(new_options)
+                new_options.grid(row = j + 1, column = i + 1)
+            # Si hay una materia, se coloca el nombre de la materia
+            # TO DO: Aqui deberiamos reemplazar materia por el nombre de la materia en la hora del dia
+            else:
+                new_text = tk.Label(frame, text = "Materia", padx = 5, pady = 8)  # Completar
+                gadgets[i].append(new_text)
+                new_text.grid(row = j + 1, column = i + 1)
+
+
+# Botones para añadir materia, ver historia, etc
+# TO DO: Terminar las funciones lambda
+def create_option_buttons(frame):
+    # Añadir materia
+    new_materia = tk.Button(frame, text = "Añadir Materia", command = lambda: print("Nueva materia añadida"))
+    new_materia.grid(row = 0, column = 0)
+    # Recomendar
+    recomendar = tk.Button(frame, text = "Ver videos recomendados", command = lambda: print("Ver videos recomendados"))
+    recomendar.grid(row = 1, column = 0)
+    # Historial
+    historial = tk.Button(frame, text = "Ver historial", command = lambda: print("Ver historial"))
+    historial.grid(row = 2, column = 0)
+    # Favoritos
+    favoritos = tk.Button(frame, text = "Videos Favoritos", command = lambda: print("Mostrar videos favoritos"))
+    favoritos.grid(row = 3, column = 0)
 
 def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrece opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
     print(prompt_choices)
