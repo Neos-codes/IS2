@@ -39,23 +39,21 @@ def asignar_hora(dia: int, hora: int, materia: str, week):
     hr._materias.clear()
     hr.add(materia)
 
-def addMateria(week: horario.Week, gadgets: list):
+def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     # Obtener lista de materias ya agregadas
     materias = []
     for x in week.choices_materia[1:]:
         materias.append(x[0])
     
+    # Esta funcion se llama desde el boton de "aceptar"
     def isInMaterias(materias: list, new_mat: tk.Entry, week: horario.Week, window: tk.Toplevel):
         if not new_mat in materias:
             print(new_mat.get())
             temp_str = new_mat.get()
             week.add_materia(temp_str)
             materias.append(temp_str)
-            """
-            for columns in gadgets:
-                for hr in columns:
-                    hr.configure(*materias)
-            """
+            # Aqui hacer update de los optionMenu
+            create_optionMenu_gadgets(frame, gadgets, materias, week, update = True)
             window.destroy()
 
         else:
@@ -77,8 +75,37 @@ def addMateria(week: horario.Week, gadgets: list):
     btn = tk.Button(top, text = "Aceptar", command = lambda: isInMaterias(materias, e, week, top))
     btn.grid(row = 2, column = 0)
 
+# Crear/actualizar "optionMenu's" del horario
+def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week: horario.Week, update = False):
+    # Borrar referencias a botones antiguos
+    if update:
+        for x in gadgets:
+            for g in x:
+                g.destroy()
+            x.clear() 
+        gadgets.clear()
+
+    # Crear optionMenus nuevos
+    for i in range(7):
+        gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
+        for j in range(13):  # Por cada hora del día "i"
+            clicked = tk.StringVar()
+            # Si no hay una materia asignada a la hora del dia, se coloca "---"
+            if not week.days[i].hrs[j]:
+                clicked.set("---")
+            # Caso contrario, se le asigna la materia que hay en la hora del día como parametro en la interfaz
+            else:
+                clicked.set(week.days[i].hrs[j][0])
+            # Se define la función a llamar cuando se escoja otra materia
+            foo = lambda materia = clicked.get(), dia = i, hr = j: asignar_hora(dia, hr, materia, week)
+            # Se crea el boton
+            new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
+            # Se agrega a la lista de gadgets
+            gadgets[i].append(new_options)
+            # Se posiciona en la grid del frame
+            new_options.grid(row = j + 1, column = i + 1)
+
 # Rellenar horas del horario
-# TO DO: AÑADIR NUEVO PARAMETRO PARA SACAR LOS NOMBRE DE LAS MATERIAS EN LA HORA DEL DIA
 def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list, hrs_days: list):
     # Agregar materias a la lista "materias"
     materias = []
@@ -99,36 +126,43 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
         labels_hrs.append(new_label)
         new_label.grid(row = i + 1, column = 0)
 
-    for i in range(7):
+    # Crear uptionMenu fields
+    create_optionMenu_gadgets(frame, gadgets, materias, week, update = False)
+    """for i in range(7):
         gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
         for j in range(13):  # Por cada hora del día "i"
-            # Si en hrs_days hay un "None", se coloca el boton agregar
             clicked = tk.StringVar()
+            # Si no hay una materia asignada a la hora del dia, se coloca "---"
             if not week.days[i].hrs[j]:
                 clicked.set(materias[len(materias) - 1])
+            # Caso contrario, se le asigna la materia que hay en la hora del día como parametro en la interfaz
             else:
                 clicked.set(week.days[i].hrs[j][0])
+            # Se define la función a llamar cuando se escoja otra materia
             foo = lambda materia = clicked.get(), dia = i, hr = j: asignar_hora(dia, hr, materia, week)
+            # Se crea el boton
             new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
+            # Se agrega a la lista de gadgets
             gadgets[i].append(new_options)
-            new_options.grid(row = j + 1, column = i + 1)
+            # Se posiciona en la grid del frame
+            new_options.grid(row = j + 1, column = i + 1)"""
 
 
 # Botones para añadir materia, ver historia, etc
 # TO DO: Terminar las funciones lambda
 
-def create_option_buttons(frame, week, gadgets, vistos):
+def create_option_buttons(horario_f, options_f, week, gadgets, vistos):
     # Añadir materia
-    new_materia = tk.Button(frame, text = "Añadir Materia", command = lambda: addMateria(week, gadgets))
+    new_materia = tk.Button(options_f, text = "Añadir Materia", command = lambda: addMateria(horario_f, week, gadgets))
     new_materia.grid(row = 0, column = 0)
     # Recomendar
-    recomendar = tk.Button(frame, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, vistos))
+    recomendar = tk.Button(options_f, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, vistos))
     recomendar.grid(row = 1, column = 0)
     # Historial
-    historial = tk.Button(frame, text = "Ver historial", command = lambda: print("Ver historial"))
+    historial = tk.Button(options_f, text = "Ver historial", command = lambda: print("Ver historial"))
     historial.grid(row = 2, column = 0)
     # Favoritos
-    favoritos = tk.Button(frame, text = "Videos Favoritos", command = lambda: print("Mostrar videos favoritos"))
+    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: print("Mostrar videos favoritos"))
     favoritos.grid(row = 3, column = 0)
 
 def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrece opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
