@@ -36,7 +36,7 @@ def asignar_hora(dia: int, hora: int, materia: str):
 # TO DO: AÑADIR NUEVO PARAMETRO PARA SACAR LOS NOMBRE DE LAS MATERIAS EN LA HORA DEL DIA
 def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list, hrs_days: list):
     # Agregar opcion "Asignar" a las materias para el boton de opciones
-    materias = week._mats_order + ["Asignar"]
+    materias = week._mats_order + ["---"]
     
     # Crear labels de los días en el horario
     for i in range(7):
