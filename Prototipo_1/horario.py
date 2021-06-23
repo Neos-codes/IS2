@@ -9,12 +9,14 @@ import random
 DAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 
 class Horario:
+    # Constructor
     def __init__(self, day, time, mat_order) -> None:
         self._materias = set()
         self._sorted_mats = list()
         self._mat_order = mat_order
         self.day = day
         self.time = time
+    # Añadir materias
     def add(self, materia):
         if materia not in self._materias:
             self._sorted_mats.append(materia)
@@ -33,6 +35,7 @@ class Horario:
 
 
 class Day:
+    # Constructor
     def __init__(self, week, name, mat_order):
         self.hrs = [Horario(self, i, mat_order) for i in range(8, 22)]
         self.week = week
@@ -50,6 +53,7 @@ class Day:
 
 class Week:
     def __init__(self):
+        # Llenar un arreglo de dias en la semana
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
         self.materias = dict()
         self._mats_order = list()
