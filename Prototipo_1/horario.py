@@ -2,6 +2,7 @@ from inspect import ArgInfo
 from pickle import load, dump
 from os.path import exists
 from recomendar import recomendar_un_video
+from vistos import ListaVistos
 import time
 import random
 
@@ -59,6 +60,7 @@ class Week:
         # Llenar un arreglo de dias en la semana
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
         self.materias = dict()
+        self.lista_vistos = ListaVistos()
         self._mats_order = list()
         self._choices_materia = []
         self._choices_day = [(day, day.name) for day in self.days]
@@ -146,6 +148,9 @@ class Week:
             self._choices_materia.append((materia, materia))
         if horario is not None:
             self.materias[materia] += horario.add(materia)
+            
+    def get_vistos(self):
+        return self.lista_vistos
 
 
 def check_save(save_path="week.pickle"):
