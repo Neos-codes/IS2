@@ -1,6 +1,7 @@
 from inspect import ArgInfo
 from pickle import load, dump
 from os.path import exists
+from os import rename, remove
 from recomendar import recomendar_un_video
 from vistos import ListaVistos
 import time
@@ -17,7 +18,7 @@ class Horario:
         self._mat_order = mat_order
         self.day = day
         self.time = time
-    
+
     # Añadir materias
     def add(self, materia):
         if materia not in self._materias:
@@ -148,24 +149,45 @@ class Week:
             self._choices_materia.append((materia, materia))
         if horario is not None:
             self.materias[materia] += horario.add(materia)
-            
+
     def get_vistos(self):
         return self.lista_vistos
 
 
-def check_save(save_path="week.pickle"):
-    return exists(save_path)
+class SaveManager:
+    def __init__(self, save_path="week.pickle"):
+        self.save_path = save_path
+        self.week = None
 
+    def __enter__(self):
+        if self.week is None:
+            if exists(self.save_path):
+                try:
+                    with open(self.save_path, 'rb') as file:
+                        self.week = load(file)
+                        if not hasattr(self.week, 'lista_vistos'):
+                            self.week.lista_vistos = ListaVistos()
+                except Exception:
+                    print('Error de carga.')
+                    rename(self.save_path, '~' + self.save_path)
+                    self.week = Week()
+        return self.week
 
-def load_save(save_path="week.pickle"):
-    with open(save_path, "rb") as file:
-        return load(file)
-
-def save(week, save_path="week.pickle"):
-    try:
-        with open(save_path, "wb") as file:
-            dump(week, file)
-            return True
-    except:
-        return False
-
+    def __exit__(self, *args):
+        bck_path = self.save_path + '.bck'
+        if exists(self.save_path):
+            if exists(bck_path):
+                remove(bck_path)
+            rename(self.save_path, bck_path)
+        try:
+            with open(self.save_path, 'wb') as file:
+                dump(self.week, file)
+        except Exception:
+            print("Error de guardado.")
+            if exists(self.save_path):
+                remove(self.save_path)
+            if exists(bck_path):
+                rename(bck_path, self.save_path)
+        finally:
+            if exists(bck_path):
+                remove(bck_path)

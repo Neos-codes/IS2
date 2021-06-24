@@ -1,5 +1,5 @@
-from argparse import ArgumentParser # , BooleanOptionalAction
-from horario import Week, DAYS, check_save, load_save, save
+from argparse import ArgumentParser
+from horario import DAYS, SaveManager
 import ui
 
 # Esto es un test para mostrar info en el horario, borrar eventualmente
@@ -55,40 +55,31 @@ def cmd_ui(week, vistos):
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
-        if(operation==ui.print_vistos): 
+        if callable(operation):
+            if(operation==ui.print_vistos):
                 operation(week.get_vistos())
             else:
                 operation(week)
         else:
-            if save(week):
-                print("El programa a terminado exitosamente.")
-                return 0
-            else:
-                print("No se a podido guardar el horario.")
-                return 1
+            return 0
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 def main(gui=None):
 
-    if check_save():
-        week = load_save()
-    else:
-        week = Week()
-
-    if gui is True:
-        return graphical_ui(week, vistos)
-    if gui is False:
-        return cmd_ui(week, vistos)
-    if gui is None:
-        try:
-            return graphical_ui(week, vistos)
-        except Exception:
-            return cmd_ui
-        finally:
-            save(week)
+    with SaveManager() as week:
+        if gui is True:
+            return graphical_ui(week, week.lista_vistos)
+        if gui is False:
+            return cmd_ui(week, week.lista_vistos)
+        if gui is None:
+            try:
+                return graphical_ui(week, week.lista_vistos)
+            except Exception:
+                return cmd_ui
 
 
 if __name__ == "__main__":
     parser = ArgumentParser('Prototipo 2')
     parser.add_argument('--gui', action="store_true", default=None)
+    parser.add_argument('--no-gui', action="store_false", default=None, dest='gui')
     main(**vars(parser.parse_args()))
