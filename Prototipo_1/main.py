@@ -59,7 +59,8 @@ def main():
     # Loop de ejecución de la ventana
     w.mainloop()
 
-# ----- END VENTANA ----- #
+    # ----- END VENTANA ----- #
+
 
     while True:
         # Escoger opcion
