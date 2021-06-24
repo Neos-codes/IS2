@@ -275,7 +275,8 @@ def print_video(video):
     print(f"Url: https://www.youtube.com/watch?v={video['id']['videoId']}")
     print()
 
-def get_video(week: horario.Week, vistos: vistos.ListaVistos):
+def get_video(week: horario.Week):
+    vistos = week.get_vistos()
     if not week:
         video = recomendar_un_video(new_materia(week), vistos)
     datetime = time.struct_time(time.localtime())
