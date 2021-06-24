@@ -14,15 +14,16 @@ from io import BytesIO
 
 days_names = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
 hours_day = list(range(8, 21))
+vistos_index = 0
 
-# Crear ventana
+# Crear ventana (desde main)
 def create_window():
     window = tk.Tk()
     window.title("Prototipo")   # Aqui debería ir el nombre del SW
 
     return window
 
-# Crear Frames
+# Crear Frames (desde main)
 def create_frames(window, frames: dict):
     # Para el horario
     horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
@@ -34,6 +35,7 @@ def create_frames(window, frames: dict):
     options.grid(row = 0, column = 0)
     frames["opciones"] = options
 
+# Se usa en create_optionMenu_gadgets
 def asignar_hora(dia: int, hora: int, materia: str, week):
     hr = week.days[dia].hrs[hora]
     hr._sorted_mats.clear()
@@ -42,6 +44,7 @@ def asignar_hora(dia: int, hora: int, materia: str, week):
     if materia != "---":
         hr.add(materia)
 
+# Se usa en create_option_buttons
 def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     # Obtener lista de materias ya agregadas
     materias = []
@@ -77,7 +80,7 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     btn = tk.Button(top, text = "Aceptar", command = lambda: isInMaterias(materias, e, week, top))
     btn.grid(row = 2, column = 0)
 
-# Crear/actualizar "optionMenu's" del horario
+# Crear/actualizar "optionMenu's" del horario (desde main y addMateria)
 def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week: horario.Week, update = False):
     # Borrar referencias a botones antiguos
     if update:
@@ -109,7 +112,7 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
             # Se posiciona en la grid del frame
             new_options.grid(row = j + 1, column = i + 1)
 
-# Rellenar horas del horario
+# Rellenar horas del horario (desde main)
 def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list):
     # Agregar materias a la lista "materias"
     materias = []
@@ -132,29 +135,48 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
 
     # Crear uptionMenu fields
     create_optionMenu_gadgets(frame, gadgets, materias, week, update = False)
-    """for i in range(7):
-        gadgets.append([])   # Añadimos una lista para los gadgets del día "i"
-        for j in range(13):  # Por cada hora del día "i"
-            clicked = tk.StringVar()
-            # Si no hay una materia asignada a la hora del dia, se coloca "---"
-            if not week.days[i].hrs[j]:
-                clicked.set(materias[len(materias) - 1])
-            # Caso contrario, se le asigna la materia que hay en la hora del día como parametro en la interfaz
-            else:
-                clicked.set(week.days[i].hrs[j][0])
-            # Se define la función a llamar cuando se escoja otra materia
-            foo = lambda materia = clicked.get(), dia = i, hr = j: asignar_hora(dia, hr, materia, week)
-            # Se crea el boton
-            new_options = tk.OptionMenu(frame, clicked, *materias, command = foo)
-            # Se agrega a la lista de gadgets
-            gadgets[i].append(new_options)
-            # Se posiciona en la grid del frame
-            new_options.grid(row = j + 1, column = i + 1)"""
 
+# Crear ventana que muestra el historial (desde create_option_buttons)
+def ver_historial(vistos: vistos.ListaVistos):
+    # Crear nueva ventana
+    top = tk.Toplevel()
+    top.title("Historial")
 
-# Botones para añadir materia, ver historia, etc
-# TO DO: Terminar las funciones lambda
+    # Label de titulo:
+    label = tk.Label(top, text = "Video:")
+    label.grid(row = 0, column = 0)
 
+    # Mostrar info de video en pantalla
+    video = vistos.getVistos()[0]   # Por test es solo el primero
+
+    # Obtener thumbnail video
+    u = urlopen(video['snippet']['thumbnails']['default']['url'])
+    raw_data = u.read()
+    u.close()
+
+    # Mostrar thumbnail video
+    img = Image.open(BytesIO(raw_data))
+    img = ImageTk.PhotoImage(img)
+    thumbnail_label = tk.Label(top, image=img)
+    thumbnail_label.image = img
+    thumbnail_label.grid(row = 1, column = 1)
+
+    # Mostrar titulo del video
+    title = tk.Label(top, text=video['snippet']['title'])
+    title.grid(row = 2, column = 1)
+
+    # Botones de accion
+    next_b = tk.Button(top, text = "Siguiente")
+    next_b.grid(row = 3, column = 2)
+
+    back_b = tk.Button(top, text = "Anterior")
+    back_b.grid(row = 3, column = 0)
+
+    play_b = tk.Button(top, text = "Play", 
+    command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
+    play_b.grid(row = 3, column = 1)
+
+# Crear botones de accion que se usan en la interfaz (desde main y create_option_buttons)
 def create_option_buttons(horario_f, options_f, week, gadgets, vistos):
     # Añadir materia
     new_materia = tk.Button(options_f, text = "Añadir Materia", command = lambda: addMateria(horario_f, week, gadgets))
@@ -163,11 +185,13 @@ def create_option_buttons(horario_f, options_f, week, gadgets, vistos):
     recomendar = tk.Button(options_f, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, vistos))
     recomendar.grid(row = 1, column = 0)
     # Historial
-    historial = tk.Button(options_f, text = "Ver historial", command = lambda: print("Ver historial"))
+    historial = tk.Button(options_f, text = "Ver historial", command = lambda: ver_historial(vistos))
     historial.grid(row = 2, column = 0)
     # Favoritos
-    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: print("Mostrar videos favoritos"))
+    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: print("EN CONSTRUCCION"))
     favoritos.grid(row = 3, column = 0)
+
+# ----- END INTERFAZ ----- #
 
 def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrese opcion: ", prompt_fail="Opcion no es valida.", prompt_go_back="Volver atras.", go_back_option=True):
     print(prompt_choices)
@@ -189,7 +213,6 @@ def choose_from(choices, prompt_choices="Opciones: ", prompt_input="Ingrese opci
             return value
         print(prompt_fail)
 
-
 def new_materia(week: horario.Week):
     while True:
         name = input("Ingrese nombre de nueva materia: ").lower()
@@ -198,16 +221,13 @@ def new_materia(week: horario.Week):
             return name
         print("Materia {name} ya existe.")
 
-
 def print_horario(week: horario.Week):
     print(week)
-
 
 def print_materias(week: horario.Week):
     print("Materias:")
     print(' '.join(week.materias))
     print()
-
 
 def add_horario_to_materia(week: horario.Week, horario=None):
     if horario is None:
@@ -224,7 +244,6 @@ def add_horario_to_materia(week: horario.Week, horario=None):
             add_materia_to_horario(week, materia=materia)
         else:
             week.add_materia(materia, horario)
-
 
 def add_materia_to_horario(week: horario.Week, materia=None):
     if materia is None:

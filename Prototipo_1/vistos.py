@@ -4,7 +4,8 @@ class ListaVistos:
 
     def add(self, video):
          if video not in self.vistos:
-            self.vistos.append(video)
+            self.vistos.insert(0, video)  # THIS
+            #self.vistos.append(video)
 
     def isVisto(self, video):
         return video in self.vistos

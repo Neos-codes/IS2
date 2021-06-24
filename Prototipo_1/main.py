@@ -53,7 +53,6 @@ def main():
     ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
 
     # Crear botones de opciones
-
     ui.create_option_buttons(frames["horario"], frames["opciones"], week, h_gadgets, vistos)
 
     # Loop de ejecución de la ventana
