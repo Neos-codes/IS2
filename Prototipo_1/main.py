@@ -1,5 +1,7 @@
+from argparse import ArgumentParser, BooleanOptionalAction
 from horario import Week, DAYS, check_save, load_save, save
 from vistos import ListaVistos
+from argparse import ArgumentParser, BooleanOptionalAction
 import ui
 
 # Esto es un test para mostrar info en el horario, borrar eventualmente
@@ -14,28 +16,18 @@ def test():
                 hrs_days[i].append(None)
             else:
                 hrs_days[i].append("nombre_materia")
-    
+
     return hrs_days
 
-
-# Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
-def main():
-
-    if check_save():
-        week = load_save()
-    else:
-        week = Week()
-    vistos = ListaVistos()
-
-    
+def graphical_ui(week, vistos):
     # ----- Ventana ----- #
 
     # Aqui iran los frames
     frames = {}
-    
+
     # Aqui van los gadgets de la matriz horarios
     h_gadgets = []
-    
+
     # Aqui los labels de los días y las horas del horario
     labels_days = []
     labels_hrs = []
@@ -49,7 +41,7 @@ def main():
     # Crear frames
     ui.create_frames(w, frames)
 
-    # Llenar grid de Horario     
+    # Llenar grid de Horario
     ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
 
     # Crear botones de opciones
@@ -61,13 +53,14 @@ def main():
     # ----- END VENTANA ----- #
 
 
+def cmd_ui(week, vistos):
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
         if callable(operation):
-            if(operation==ui.get_video):
+            if(operation == ui.get_video):
                 operation(week, vistos)
-            elif(operation==ui.print_vistos): 
+            elif(operation == ui.print_vistos):
                 operation(vistos)
             else:
                 operation(week)
@@ -79,5 +72,29 @@ def main():
                 print("No se a podido guardar el horario.")
                 return 1
 
+# Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
+def main(gui=None):
+
+    if check_save():
+        week = load_save()
+    else:
+        week = Week()
+    vistos = ListaVistos()
+
+    if gui is True:
+        return graphical_ui(week, vistos)
+    if gui is False:
+        return cmd_ui(week, vistos)
+    if gui is None:
+        try:
+            return graphical_ui(week, vistos)
+        except Exception:
+            return cmd_ui
+        finally:
+            save(week)
+
+
 if __name__ == "__main__":
-    main()
+    parser = ArgumentParser('Prototipo 2')
+    parser.add_argument('--gui', action=BooleanOptionalAction, default=None)
+    main(**vars(parser.parse_args()))
