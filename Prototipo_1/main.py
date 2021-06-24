@@ -1,7 +1,6 @@
-from argparse import ArgumentParser, BooleanOptionalAction
+from argparse import ArgumentParser # , BooleanOptionalAction
 from horario import Week, DAYS, check_save, load_save, save
 from vistos import ListaVistos
-from argparse import ArgumentParser, BooleanOptionalAction
 import ui
 
 # Esto es un test para mostrar info en el horario, borrar eventualmente
@@ -96,5 +95,5 @@ def main(gui=None):
 
 if __name__ == "__main__":
     parser = ArgumentParser('Prototipo 2')
-    parser.add_argument('--gui', action=BooleanOptionalAction, default=None)
+    parser.add_argument('--gui', action="store_true", default=None)
     main(**vars(parser.parse_args()))

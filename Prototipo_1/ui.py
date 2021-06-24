@@ -379,7 +379,7 @@ def n_videos(week, vistos, n=5):
         videos = []
         while n:
             video = next(search)
-            if video not in lista:
+            if video not in vistos:
                 # video['materia'] = materia
                 videos.append(video)
                 n -= 1
