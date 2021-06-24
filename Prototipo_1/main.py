@@ -1,6 +1,5 @@
 from argparse import ArgumentParser # , BooleanOptionalAction
 from horario import Week, DAYS, check_save, load_save, save
-from vistos import ListaVistos
 import ui
 
 # Esto es un test para mostrar info en el horario, borrar eventualmente
@@ -56,11 +55,8 @@ def cmd_ui(week, vistos):
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
-        if callable(operation):
-            if(operation == ui.get_video):
-                operation(week, vistos)
-            elif(operation == ui.print_vistos):
-                operation(vistos)
+        if(operation==ui.print_vistos): 
+                operation(week.get_vistos())
             else:
                 operation(week)
         else:
@@ -78,7 +74,6 @@ def main(gui=None):
         week = load_save()
     else:
         week = Week()
-    vistos = ListaVistos()
 
     if gui is True:
         return graphical_ui(week, vistos)
