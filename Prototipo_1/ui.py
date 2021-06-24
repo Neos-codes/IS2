@@ -4,7 +4,7 @@ import time
 import vistos
 import tkinter as tk
 from tkinter import messagebox
-import webbrowser 
+import webbrowser
 from ytAPI import youtube_search, video_search_gen
 from PIL import Image, ImageTk
 from urllib.request import urlopen
@@ -50,7 +50,7 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     materias = []
     for x in week.choices_materia[1:]:
         materias.append(x[0])
-    
+
     # Esta funcion se llama desde el boton de "aceptar"
     def isInMaterias(materias: list, new_mat: tk.Entry, week: horario.Week, window: tk.Toplevel):
         temp_str = new_mat.get()
@@ -67,15 +67,15 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     # Crear nueva ventana
     top = tk.Toplevel()
     top.title("Añadir materia")
-    
+
     # Label
     label = tk.Label(top, text = "Ingrese el nombre de la nueva materia:")
     label.grid(row = 0, column = 0)
-    
+
     # Añadir input field
     e = tk.Entry(top, width = 30)
     e.grid(row = 1, column = 0)
-    
+
     # Añadir boton de aceptar
     btn = tk.Button(top, text = "Aceptar", command = lambda: isInMaterias(materias, e, week, top))
     btn.grid(row = 2, column = 0)
@@ -87,7 +87,7 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
         for x in gadgets:
             for g in x:
                 g.destroy()
-            x.clear() 
+            x.clear()
         gadgets.clear()
 
     if not "---" in materias:
@@ -120,13 +120,13 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
         materias.append(x[0])
     materias += ["---"]
 
-    
+
     # Crear labels de los días en el horario
     for i in range(7):
         new_label = tk.Label(frame, text = days_names[i], padx = 30, pady = 10)
         labels_days.append(new_label)
         new_label.grid(row = 0, column = i + 1)
-    
+
     # Crear labels de las horas en el horario
     for i in range(13):
         new_label = tk.Label(frame, text = str(hours_day[i]), padx = 5, pady = 8)
@@ -172,7 +172,7 @@ def ver_historial(vistos: vistos.ListaVistos):
     back_b = tk.Button(top, text = "Anterior")
     back_b.grid(row = 3, column = 0)
 
-    play_b = tk.Button(top, text = "Play", 
+    play_b = tk.Button(top, text = "Play",
     command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     play_b.grid(row = 3, column = 1)
 
@@ -310,12 +310,12 @@ def get_video(week: horario.Week, vistos: vistos.ListaVistos):
 
 def get_video_b(week: horario.Week, vistos: vistos.ListaVistos):
     '''
-    Esta funcion es una copia de get_video() para poder hacerle cambios 
+    Esta funcion es una copia de get_video() para poder hacerle cambios
     libremente sin alterar el funcionamiento del resto del programa.
-    Es una version simplificada que no da opciones para agregar materias 
+    Es una version simplificada que no da opciones para agregar materias
     en caso de que no haya ninguna asignada para el momento.
     Por ahora esta funcion solo es utilizada en ver_videos_recomendados().
-    
+
     Parameters
     ----------
     week : horario.Week
@@ -364,15 +364,14 @@ def play_video(video, vistos: vistos.ListaVistos):
     '''
     webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}")
     vistos.add(video)
-    
+
 def n_videos(week, vistos, n=5):
     datetime = time.struct_time(time.localtime())
-    lista = vistos.getVistos()
     # horario = next(h for h in week.week_iterator(datetime.tm_wday, datetime.tm_hour-1) if h)
     hr = datetime.tm_hour-8
     if hr < 0 or hr > 12:
         return None
-    
+
     horario = week.days[datetime.tm_wday].hrs[datetime.tm_hour-8]
     if horario:
         materia = horario[0]
@@ -380,20 +379,20 @@ def n_videos(week, vistos, n=5):
         videos = []
         while n:
             video = next(search)
-            if video not in lista:
+            if video not in vistos:
                 video['materia'] = materia
                 # vistos.add(video)
                 videos.append(video)
                 n -= 1
-                
+
         return videos
     else:
         return None
-    
-    
+
+
 def ver_videos_recomendados(week, vistos):
     '''
-    Abre una ventana que muestra una lista de videos recomendados, de acuerdo 
+    Abre una ventana que muestra una lista de videos recomendados, de acuerdo
     a la materia asignada al bloque de hora correspondiente al del momento.
 
     Parameters
@@ -414,28 +413,28 @@ def ver_videos_recomendados(week, vistos):
     if not week:
         #error message
         return
-        
+
     lista_videos = n_videos(week, vistos)
-    
+
     if lista_videos is None:
         tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
         return
-    
+
     # video = get_video_b(week, vistos)
     # if video is None:
     #     tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
     #     return
-    
+
     newWindow = tk.Toplevel()
     newWindow.title("Videos recomendados")
     newWindow.geometry("500x700")
-        
+
     title = tk.Label(newWindow, text="Recomendaciones para este bloque:", font=("Verdana", 12))
     title.pack(pady = 8)
-    
+
     i = 0
     vid_grid = tk.Frame(newWindow)
-    
+
     for vid in lista_videos:
         u = urlopen(vid['snippet']['thumbnails']['default']['url'])
         raw_data = u.read()
@@ -447,28 +446,28 @@ def ver_videos_recomendados(week, vistos):
         thumbnail_label.image = img
         thumbnail_list.append(thumbnail_label)
         thumbnail_label.grid(column = 0, row = i, sticky='e')
-        
-        
+
+
         title_label = tk.Label(vid_grid, text=vid['snippet']['title'])
         title_label_list.append(title_label)
         title_label.grid(column = 0, row = i+1, columnspan=2, pady = (0, 15))
-        
-        button = tk.Button(vid_grid, text="Play", 
+
+        button = tk.Button(vid_grid, text="Play",
                        command = lambda v = vid: play_video(v, vistos))
         play_button_list.append(button)
         button.grid(column = 1, row = i)
-        
+
         i += 2
-    
-    
+
+
     vid_grid.pack()
-        
+
     # #print(video['snippet']['thumbnails']['default']['url'])
     # u = urlopen(video['snippet']['thumbnails']['default']['url'])
     # raw_data = u.read()
     # u.close()
     # #print(raw_data)
-    
+
     # img = Image.open(BytesIO(raw_data))
     # #img = img.resize((250, 250))
     # img = ImageTk.PhotoImage(img)
@@ -478,16 +477,16 @@ def ver_videos_recomendados(week, vistos):
 
     # label1 = tk.Label(newWindow, text=video['snippet']['title'])
     # label1.pack()
-    
-    # button = tk.Button(newWindow, text="Play", 
+
+    # button = tk.Button(newWindow, text="Play",
     #                    command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     # button.pack()
 
 
 def boof() :
-    
+
     top = tk.Toplevel()
-    
+
 MAIN_MENU = {"choices": [(print_horario, "Ver mi horario."),
                          (print_materias, "Ver mis materias."),
                          (add_horario_to_materia, "Añadir horas a materias."),
@@ -497,4 +496,3 @@ MAIN_MENU = {"choices": [(print_horario, "Ver mi horario."),
              "prompt_choices": "¿Que desea hacer?",
              "prompt_input": "(Ingrese numero):",
              "prompt_go_back": "Salir"}
-
