@@ -30,6 +30,7 @@ class VideoCache:
 
 
 def video_search_gen(busqueda, duracion=None):
+        # Diccionario
         params = {"part": "id, snippet",
                 "q": busqueda, "type": "video"}
         if duracion is not None:
