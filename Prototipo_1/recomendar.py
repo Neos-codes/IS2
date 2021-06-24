@@ -124,7 +124,7 @@ def recomendar_un_video(materia, vistos, tiempo=None):
         video = next(ytAPI.video_search(materia, duracion=d))
         if (tiempo is None or video['duration'] <= tiempo) and video not in lista:
             video['materia'] = materia
-            vistos.add(video)
+            #vistos.add(video)
             return video
 
 
