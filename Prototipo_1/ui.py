@@ -2,6 +2,7 @@ from recomendar import recomendar_un_video
 import horario
 import time
 import vistos
+import favoritos as fav
 import tkinter as tk
 from tkinter import messagebox
 import webbrowser
@@ -175,21 +176,97 @@ def ver_historial(vistos: vistos.ListaVistos):
     play_b = tk.Button(top, text = "Play",
     command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     play_b.grid(row = 3, column = 1)
+    
+#############################################################################################################
+
+# Crear ventana que muestra los favoritos (desde create_option_buttons) CARLOS
+def ver_favoritos(favoritos):
+    # Crear nueva ventana
+    top = tk.Toplevel()
+    top.title("Favoritos")
+
+    # Label de titulo:
+    label = tk.Label(top, text = "Video:")
+    label.grid(row = 0, column = 0)
+
+    # Mostrar info de video en pantalla
+    video = favoritos.getFavoritos()[0]   # Por test es solo el primero
+
+    # Obtener thumbnail video
+    u = urlopen(video['snippet']['thumbnails']['default']['url'])
+    raw_data = u.read()
+    u.close()
+
+    # Mostrar thumbnail video
+    img = Image.open(BytesIO(raw_data))
+    img = ImageTk.PhotoImage(img)
+    thumbnail_label = tk.Label(top, image=img)
+    thumbnail_label.image = img
+    thumbnail_label.grid(row = 1, column = 1)
+
+    # Mostrar titulo del video
+    title = tk.Label(top, text=video['snippet']['title'])
+    title.grid(row = 2, column = 1)
+
+    # Botones de accion
+    next_b = tk.Button(top, text = "Siguiente")
+    next_b.grid(row = 3, column = 2)
+
+    back_b = tk.Button(top, text = "Anterior")
+    back_b.grid(row = 3, column = 0)
+
+    play_b = tk.Button(top, text = "Play",
+    command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
+    play_b.grid(row = 3, column = 1)
+    
+    delete_b = tk.Button(top, text = "Detele",
+    command = favoritos.deleteFavoritos(video))
+    delete_b.grid(row = 3, column = 3)
+    
+#crea una ventana para poner o no el video en favoritos (desde play_video) CARLOS
+def ventanaFavoritos(favoritos,video):
+    #crear ventana
+    top = tk.Toplevel()
+    top.title("¿Favorito?")
+    
+    # Label de titulo:
+    label = tk.Label(top, text = "¿desea agregar el video a favoritos?")
+    label.grid(row = 0, column = 0)
+    
+    # Botones de accion
+    next_b = tk.Button(top, text = "Si",  command = lambda: addFavoritos(favoritos,video))
+    next_b.grid(row = 3, column = 0)
+
+    back_b = tk.Button(top, text = "No", command = top.close())
+    back_b.grid(row = 4, column = 0)
+
+    
+     
+    
+def addFavoritos(favoritos,video): #CARLOS
+    print("hola")
+    favoritos.add(video)
+
+
+###################################################################################################################
+
 
 # Crear botones de accion que se usan en la interfaz (desde main y create_option_buttons)
-def create_option_buttons(horario_f, options_f, week, gadgets, vistos):
+def create_option_buttons(horario_f, options_f, week, gadgets, vistos,favo):
+    print("favoritos: " + str(favo))
+    print("vistos: " + str(vistos))
     # Añadir materia
     new_materia = tk.Button(options_f, text = "Añadir Materia", command = lambda: addMateria(horario_f, week, gadgets))
     new_materia.grid(row = 0, column = 0)
     # Recomendar
-    recomendar = tk.Button(options_f, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, vistos))
+    recomendar = tk.Button(options_f, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week,vistos,favo))
     recomendar.grid(row = 1, column = 0)
     # Historial
     historial = tk.Button(options_f, text = "Ver historial", command = lambda: ver_historial(vistos))
     historial.grid(row = 2, column = 0)
     # Favoritos
-    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: print("EN CONSTRUCCION"))
-    favoritos.grid(row = 3, column = 0)
+    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: ver_favoritos(favo)) #CARLOS
+    favoritos.grid(row = 3, column = 0)#CARLOS
 
 # ----- END INTERFAZ ----- #
 
@@ -347,7 +424,8 @@ def print_vistos(vistos: vistos.ListaVistos):
             print_video(video)
     print()
 
-def play_video(video, vistos: vistos.ListaVistos):
+def play_video(video, vistos: vistos.ListaVistos,favoritos):
+    
     '''
     Reproduce un video en el navegador predeterminado
 
@@ -365,6 +443,8 @@ def play_video(video, vistos: vistos.ListaVistos):
     '''
     webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}")
     vistos.add(video)
+    
+    ventanaFavoritos(favoritos,video)#CARLOS
 
 def n_videos(week, vistos, n=5):
     datetime = time.struct_time(time.localtime())
@@ -390,7 +470,9 @@ def n_videos(week, vistos, n=5):
         return None
 
 
-def ver_videos_recomendados(week, vistos):
+def ver_videos_recomendados(week, vistos, favoritos):
+    print("favoritos2: " + str(favoritos))
+    print("vistos2: " + str(vistos))
     '''
     Abre una ventana que muestra una lista de videos recomendados, de acuerdo
     a la materia asignada al bloque de hora correspondiente al del momento.
@@ -453,7 +535,7 @@ def ver_videos_recomendados(week, vistos):
         title_label.grid(column = 0, row = i+1, columnspan=2, pady = (0, 15))
 
         button = tk.Button(vid_grid, text="Play",
-                       command = lambda v = vid: play_video(v, vistos))
+                       command = lambda v = vid: play_video(v, vistos,favoritos))
         play_button_list.append(button)
         button.grid(column = 1, row = i)
 

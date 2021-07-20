@@ -4,6 +4,7 @@ from os.path import exists
 from os import rename, remove
 from recomendar import recomendar_un_video
 from vistos import ListaVistos
+from favoritos import ListaFav
 import time
 import random
 
@@ -61,7 +62,10 @@ class Week:
         # Llenar un arreglo de dias en la semana
         self.days = [Day(self, name, self.get_mats_order) for name in DAYS]
         self.materias = dict()
+        print("fav1")
         self.lista_vistos = ListaVistos()
+        self.lista_favoritos = ListaFav()#CAMBIO
+        print("fav2")
         self._mats_order = list()
         self._choices_materia = []
         self._choices_day = [(day, day.name) for day in self.days]
@@ -152,6 +156,9 @@ class Week:
 
     def get_vistos(self):
         return self.lista_vistos
+    #CAMBIO
+    def get_favoritos(self):
+        return self.lista_favoritos
 
 
 class SaveManager:
@@ -166,7 +173,9 @@ class SaveManager:
                     with open(self.save_path, 'rb') as file:
                         self.week = load(file)
                         if not hasattr(self.week, 'lista_vistos'):
+                            print("fav2")
                             self.week.lista_vistos = ListaVistos()
+                            self.week.lista_favoritos = ListaFav()
                 except Exception:
                     print('Error de carga.')
                     rename(self.save_path, '~' + self.save_path)

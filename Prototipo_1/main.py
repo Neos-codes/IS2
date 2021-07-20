@@ -21,6 +21,7 @@ def graphical_ui(week):
     # ----- Ventana ----- #
 
     vistos = week.get_vistos()
+    favoritos = week.get_favoritos()
     # Aqui iran los frames
     frames = {}
 
@@ -44,7 +45,7 @@ def graphical_ui(week):
     ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
 
     # Crear botones de opciones
-    ui.create_option_buttons(frames["horario"], frames["opciones"], week, h_gadgets, vistos)
+    ui.create_option_buttons(frames["horario"], frames["opciones"], week, h_gadgets, vistos,favoritos)
 
     # Loop de ejecución de la ventana
     w.mainloop()
@@ -54,7 +55,7 @@ def graphical_ui(week):
 
 def cmd_ui(week):
     vistos = week.get_vistos()
-
+    print("hola")
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
@@ -68,21 +69,27 @@ def cmd_ui(week):
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 def main(gui=None):
-
+    print(gui)
     with SaveManager() as week:
         if gui is True:
-            return graphical_ui(week)
+            print(1)
+            return graphical_ui(week, week.lista_vistos)
         if gui is False:
-            return cmd_ui(week)
+            print(2)
+            return cmd_ui(week, week.lista_vistos)
         if gui is None:
-            try:
+            print(3)
+            return graphical_ui(week)
+            '''try:
                 return graphical_ui(week)
             except Exception:
-                return cmd_ui(week)
+                print("hola2")
+                return cmd_ui'''
 
 
 if __name__ == "__main__":
     parser = ArgumentParser('Prototipo 2')
     parser.add_argument('--gui', action="store_true", default=None)
     parser.add_argument('--no-gui', action="store_false", default=None, dest='gui')
+    print(parser)
     main(**vars(parser.parse_args()))
