@@ -55,7 +55,7 @@ def graphical_ui(week):
 
 def cmd_ui(week):
     vistos = week.get_vistos()
-    print("hola")
+    ##print("hola")
     while True:
         # Escoger opcion
         operation = ui.choose_from(**ui.MAIN_MENU)
@@ -69,7 +69,7 @@ def cmd_ui(week):
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 def main(gui=None):
-    print(gui)
+    ##print(gui)
     with SaveManager() as week:
         if gui is True:
             print(1)
@@ -91,5 +91,5 @@ if __name__ == "__main__":
     parser = ArgumentParser('Prototipo 2')
     parser.add_argument('--gui', action="store_true", default=None)
     parser.add_argument('--no-gui', action="store_false", default=None, dest='gui')
-    print(parser)
+    #print(parser)
     main(**vars(parser.parse_args()))
