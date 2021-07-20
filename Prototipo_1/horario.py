@@ -178,8 +178,14 @@ class SaveManager:
                             self.week.lista_favoritos = ListaFav()
                 except Exception:
                     print('Error de carga.')
-                    rename(self.save_path, '~' + self.save_path)
+                    bck_save_path = '~' + self.save_path
+                    if exists(bck_save_path):
+                        remove(bck_save_path)
+                    rename(self.save_path, bck_save_path)
                     self.week = Week()
+            else:
+                self.week = Week()
+        assert self.week is not None
         return self.week
 
     def __exit__(self, *args):
