@@ -71,14 +71,14 @@ def main(gui=None):
 
     with SaveManager() as week:
         if gui is True:
-            return graphical_ui(week, week.lista_vistos)
+            return graphical_ui(week)
         if gui is False:
-            return cmd_ui(week, week.lista_vistos)
+            return cmd_ui(week)
         if gui is None:
             try:
-                return graphical_ui(week, week.lista_vistos)
+                return graphical_ui(week)
             except Exception:
-                return cmd_ui
+                return cmd_ui(week)
 
 
 if __name__ == "__main__":
