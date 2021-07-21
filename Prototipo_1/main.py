@@ -41,7 +41,7 @@ def graphical_ui(week):
     # Crear frames
     ui.create_frames(w, frames)
 
-    # Llenar grid de Horario
+    # Llenar grid de Horario luego de crear frames
     ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
 
     # Crear botones de opciones

@@ -17,14 +17,14 @@ days_names = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Do
 hours_day = list(range(8, 21))
 vistos_index = 0
 
-# Crear ventana (desde main)
+# Crear ventana (desde main)  FABIAN
 def create_window():
     window = tk.Tk()
     window.title("Prototipo")   # Aqui debería ir el nombre del SW
 
     return window
 
-# Crear Frames (desde main)
+# Crear Frames (desde main) FABIAN
 def create_frames(window, frames: dict):
     # Para el horario (Por defecto a la derecha)
     horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
@@ -43,7 +43,15 @@ def create_frames(window, frames: dict):
     vid_r = tk.LabelFrame(window, text = "Recomendaciones", padx = 5, pady = 5)
     frames["recomendados"] = vid_r
 
-# Se usa en create_option_buttons
+    # Para el historial
+    historial_f = tk.LabelFrame(window, text = "Historial", padx = 5, pady = 5)
+    frames["historial"] = historial_f
+
+    # Para videos favoritos
+    favoritos_f = tk.LabelFrame(window, text = "Videos Favoritos", padx = 5, pady = 5)
+    frames["favoritos"] = favoritos_f
+
+# Se usa en create_option_buttons  FABIAN
 def ver_horario(frames):
     if frames["aux"] == frames["horario"]:
         print("Ya se esta mostrando el horario")
@@ -53,7 +61,7 @@ def ver_horario(frames):
         frames["aux"] = frames["horario"]
         frames["aux"].grid(row = 0, column = 1)
 
-# Se usa en create_optionMenu_gadgets
+# Se usa en create_optionMenu_gadgets  FABIAN
 def asignar_hora(dia: int, hora: int, materia: str, week):
     hr = week.days[dia].hrs[hora]
     hr._sorted_mats.clear()
@@ -62,7 +70,7 @@ def asignar_hora(dia: int, hora: int, materia: str, week):
     if materia != "---":
         hr.add(materia)
 
-# Se usa en create_option_buttons
+# Se usa en create_option_buttons   FABIAN
 def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     # Obtener lista de materias ya agregadas
     materias = []
@@ -77,6 +85,7 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
             materias.append(temp_str)
             # Aqui hacer update de los optionMenu
             create_optionMenu_gadgets(frame, gadgets, materias, week, update = True)
+            tk.messagebox.showinfo("Eureka!", "Materia añadida")
             window.destroy()
 
         else:
@@ -98,7 +107,7 @@ def addMateria(frame: tk.Tk, week: horario.Week, gadgets: list):
     btn = tk.Button(top, text = "Aceptar", command = lambda: isInMaterias(materias, e, week, top))
     btn.grid(row = 2, column = 0)
 
-# Crear/actualizar "optionMenu's" del horario (desde main y addMateria)
+# Crear/actualizar "optionMenu's" del horario (desde main y addMateria)   FABIAN
 def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week: horario.Week, update = False):
     # Borrar referencias a botones antiguos
     if update:
@@ -130,7 +139,7 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
             # Se posiciona en la grid del frame
             new_options.grid(row = j + 1, column = i + 1)
 
-# Rellenar horas del horario (desde main)
+# Rellenar horas del horario (desde main)   FABIAN
 def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list):
     # Agregar materias a la lista "materias"
     materias = []
@@ -154,14 +163,18 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
     # Crear uptionMenu fields
     create_optionMenu_gadgets(frame, gadgets, materias, week, update = False)
 
-# Crear ventana que muestra el historial (desde create_option_buttons)
-def ver_historial(vistos: vistos.ListaVistos):
+# Crear ventana que muestra el historial (desde create_option_buttons)   FABIAN
+def ver_historial(frames, vistos: vistos.ListaVistos):
     # Crear nueva ventana
-    top = tk.Toplevel()
-    top.title("Historial")
+    #top = tk.Toplevel()
+    #top.title("Historial")
+
+    if len(vistos.getVistos()) == 0:
+        tk.messagebox.showinfo("Sin videos", "No tienes videos en tu historial")
+        return
 
     # Label de titulo:
-    label = tk.Label(top, text = "Video:")
+    label = tk.Label(frames["historial"], text = "Video:")
     label.grid(row = 0, column = 0)
 
     # Mostrar info de video en pantalla
@@ -175,35 +188,45 @@ def ver_historial(vistos: vistos.ListaVistos):
     # Mostrar thumbnail video
     img = Image.open(BytesIO(raw_data))
     img = ImageTk.PhotoImage(img)
-    thumbnail_label = tk.Label(top, image=img)
+    thumbnail_label = tk.Label(frames["historial"], image=img)
     thumbnail_label.image = img
     thumbnail_label.grid(row = 1, column = 1)
 
     # Mostrar titulo del video
-    title = tk.Label(top, text=video['snippet']['title'])
+    title = tk.Label(frames["historial"], text=video['snippet']['title'])
     title.grid(row = 2, column = 1)
 
     # Botones de accion
-    next_b = tk.Button(top, text = "Siguiente")
+    next_b = tk.Button(frames["historial"], text = "Siguiente")
     next_b.grid(row = 3, column = 2)
 
-    back_b = tk.Button(top, text = "Anterior")
+    back_b = tk.Button(frames["historial"], text = "Anterior")
     back_b.grid(row = 3, column = 0)
 
-    play_b = tk.Button(top, text = "Play",
+    play_b = tk.Button(frames["historial"], text = "Play",
     command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     play_b.grid(row = 3, column = 1)
+
+    frames["aux"].grid_forget()
+    frames["aux"] = frames["historial"]
+    frames["aux"].grid(row = 0, column = 1)
     
 #############################################################################################################
 
 # Crear ventana que muestra los favoritos (desde create_option_buttons) CARLOS
-def ver_favoritos(favoritos):
+def ver_favoritos(frames, favoritos):
+    
+    if len(favoritos.getFavoritos()) == 0:
+        tk.messagebox.showinfo("Sin videos", "No hay ningun video en tu lista de favoritos")
+        return
     # Crear nueva ventana
-    top = tk.Toplevel()
-    top.title("Favoritos")
+    #top = tk.Toplevel()
+    #top.title("Favoritos")
+
+    frame = frames["favoritos"]
 
     # Label de titulo:
-    label = tk.Label(top, text = "Video:")
+    label = tk.Label(frame, text = "Video:")
     label.grid(row = 0, column = 0)
 
     # Mostrar info de video en pantalla
@@ -217,31 +240,35 @@ def ver_favoritos(favoritos):
     # Mostrar thumbnail video
     img = Image.open(BytesIO(raw_data))
     img = ImageTk.PhotoImage(img)
-    thumbnail_label = tk.Label(top, image=img)
+    thumbnail_label = tk.Label(frame, image=img)
     thumbnail_label.image = img
     thumbnail_label.grid(row = 1, column = 1)
 
     # Mostrar titulo del video
-    title = tk.Label(top, text=video['snippet']['title'])
+    title = tk.Label(frame, text=video['snippet']['title'])
     title.grid(row = 2, column = 1)
 
     # Botones de accion
-    next_b = tk.Button(top, text = "Siguiente")
+    next_b = tk.Button(frame, text = "Siguiente")
     next_b.grid(row = 3, column = 2)
 
-    back_b = tk.Button(top, text = "Anterior")
+    back_b = tk.Button(frame, text = "Anterior")
     back_b.grid(row = 3, column = 0)
 
-    play_b = tk.Button(top, text = "Play",
+    play_b = tk.Button(frame, text = "Play",
     command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     play_b.grid(row = 3, column = 1)
     
-    delete_b = tk.Button(top, text = "Detele",
+    delete_b = tk.Button(frame, text = "Delete",
     command = favoritos.deleteFavoritos(video))
     delete_b.grid(row = 3, column = 3)
+
+    frames["aux"].grid_forget()
+    frames["aux"] = frames["favoritos"]
+    frames["aux"].grid(row = 0, column = 1)
     
 #crea una ventana para poner o no el video en favoritos (desde play_video) CARLOS
-def ventanaFavoritos(favoritos,video):
+def ventanaFavoritos(favoritos, video):
     #crear ventana
     top = tk.Toplevel()
     top.title("¿Favorito?")
@@ -259,7 +286,8 @@ def ventanaFavoritos(favoritos,video):
 
 
 def addFavoritos(favoritos,video): #CARLOS
-    favoritos.add(video)
+    if not (video in favoritos):
+        favoritos.add(video)
 
 
 ###################################################################################################################
@@ -279,10 +307,10 @@ def create_option_buttons(frames: dict, week, gadgets, vistos, favo):
     recomendar = tk.Button(frames["opciones"], text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, frames, vistos, favo))
     recomendar.grid(row = 2, column = 0)
     # Historial
-    historial = tk.Button(frames["opciones"], text = "Ver historial", command = lambda: ver_historial(vistos))
+    historial = tk.Button(frames["opciones"], text = "Ver historial", command = lambda: ver_historial(frames, vistos))
     historial.grid(row = 3, column = 0)
     # Favoritos
-    favoritos = tk.Button(frames["opciones"], text = "Videos Favoritos", command = lambda: ver_favoritos(favo)) #CARLOS
+    favoritos = tk.Button(frames["opciones"], text = "Videos Favoritos", command = lambda: ver_favoritos(frames, favo)) #CARLOS
     favoritos.grid(row = 4, column = 0)#CARLOS
 
 # ----- END INTERFAZ ----- #
@@ -323,7 +351,7 @@ def print_materias(week: horario.Week):
     print(' '.join(week.materias))
     print()
 
-def add_horario_to_materia(week: horario.Week, horario=None):
+def add_horario_to_materia(week: horario.Week, horario = None):
     if horario is None:
         prompr_materia = "Agregar materia:"
     else:
@@ -339,7 +367,7 @@ def add_horario_to_materia(week: horario.Week, horario=None):
         else:
             week.add_materia(materia, horario)
 
-def add_materia_to_horario(week: horario.Week, materia=None):
+def add_materia_to_horario(week: horario.Week, materia = None):
     if materia is None:
         prompt_dia = "Agregar a dia:"
         prompt_horario = "Agregar a horario de dia {day.name}:"
@@ -461,7 +489,7 @@ def play_video(video, vistos: vistos.ListaVistos,favoritos):
     webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}")
     vistos.add(video)
     
-    ventanaFavoritos(favoritos,video)#CARLOS
+    #ventanaFavoritos(favoritos, video) #CARLOS
 
 def n_videos(week, vistos, n=5):
     datetime = time.struct_time(time.localtime())
@@ -488,8 +516,8 @@ def n_videos(week, vistos, n=5):
 
 
 def ver_videos_recomendados(week, frames: dict, vistos, favoritos):
-    print("favoritos2: " + str(favoritos))
-    print("vistos2: " + str(vistos))
+    #print("favoritos2: " + str(favoritos))
+    #print("vistos2: " + str(vistos))
     '''
     Abre una ventana que muestra una lista de videos recomendados, de acuerdo
     a la materia asignada al bloque de hora correspondiente al del momento.
@@ -553,9 +581,12 @@ def ver_videos_recomendados(week, frames: dict, vistos, favoritos):
         title_label.grid(column = 0, row = i+1, columnspan=2, pady = (0, 15))
 
         button = tk.Button(vid_grid, text="Play",
-                       command = lambda v = vid: play_video(v, vistos,favoritos))
+                       command = lambda v = vid: play_video(v, vistos, favoritos))
         play_button_list.append(button)
         button.grid(column = 1, row = i)
+
+        button2 = tk.Button(vid_grid, text = "Añadir a favoritos", command = lambda v = vid: addFavoritos(favoritos, v))
+        button2.grid(column = 2, row = i)
 
         i += 2
 
