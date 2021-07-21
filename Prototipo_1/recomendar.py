@@ -134,7 +134,7 @@ def main():
     maxLargos = int(input("Elija la cantidad de videos largos maximos que quiere\n"))
     maxMedios = int(input("Elija la cantidad de videos medios maximos que quiere\n"))
     tags = input("Ponga sus tags separados por espacio\n").split()
-    print(list(recomendar(tiempo, maxLargos, maxMedios, tags)))
+    #print(list(recomendar(tiempo, maxLargos, maxMedios, tags)))
 
 if __name__ == "__main__":
     main()

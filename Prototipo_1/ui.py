@@ -26,15 +26,32 @@ def create_window():
 
 # Crear Frames (desde main)
 def create_frames(window, frames: dict):
-    # Para el horario
+    # Para el horario (Por defecto a la derecha)
     horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
     horario.grid(row = 0, column = 1)
     frames["horario"] = horario
+
+    # Frame auxiliar, por defecto es siempre el horario
+    frames["aux"] = horario
 
     # Para los botones de opciones
     options = tk.LabelFrame(window, text = "Opciones", padx = 5, pady = 5)
     options.grid(row = 0, column = 0)
     frames["opciones"] = options
+
+    # Para los videos recomendados
+    vid_r = tk.LabelFrame(window, text = "Recomendaciones", padx = 5, pady = 5)
+    frames["recomendados"] = vid_r
+
+# Se usa en create_option_buttons
+def ver_horario(frames):
+    if frames["aux"] == frames["horario"]:
+        print("Ya se esta mostrando el horario")
+        return
+    else:
+        frames["aux"].grid_forget()
+        frames["aux"] = frames["horario"]
+        frames["aux"].grid(row = 0, column = 1)
 
 # Se usa en create_optionMenu_gadgets
 def asignar_hora(dia: int, hora: int, materia: str, week):
@@ -240,11 +257,8 @@ def ventanaFavoritos(favoritos,video):
     back_b = tk.Button(top, text = "No", command = top.close())
     back_b.grid(row = 4, column = 0)
 
-    
-     
-    
+
 def addFavoritos(favoritos,video): #CARLOS
-    print("hola")
     favoritos.add(video)
 
 
@@ -252,21 +266,24 @@ def addFavoritos(favoritos,video): #CARLOS
 
 
 # Crear botones de accion que se usan en la interfaz (desde main y create_option_buttons)
-def create_option_buttons(horario_f, options_f, week, gadgets, vistos,favo):
-    print("favoritos: " + str(favo))
-    print("vistos: " + str(vistos))
+def create_option_buttons(frames: dict, week, gadgets, vistos, favo):
+    #print("favoritos: " + str(favo))
+    #print("vistos: " + str(vistos))
+    # Ver horario
+    mostrar_horario = tk.Button(frames["opciones"], text = "Horario", command = lambda: ver_horario(frames))
+    mostrar_horario.grid(row = 0, column = 0)
     # Añadir materia
-    new_materia = tk.Button(options_f, text = "Añadir Materia", command = lambda: addMateria(horario_f, week, gadgets))
-    new_materia.grid(row = 0, column = 0)
+    new_materia = tk.Button(frames["opciones"], text = "Añadir Materia", command = lambda: addMateria(frames["horario"], week, gadgets))
+    new_materia.grid(row = 1, column = 0)
     # Recomendar
-    recomendar = tk.Button(options_f, text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week,vistos,favo))
-    recomendar.grid(row = 1, column = 0)
+    recomendar = tk.Button(frames["opciones"], text = "Ver videos recomendados", command = lambda: ver_videos_recomendados(week, frames, vistos, favo))
+    recomendar.grid(row = 2, column = 0)
     # Historial
-    historial = tk.Button(options_f, text = "Ver historial", command = lambda: ver_historial(vistos))
-    historial.grid(row = 2, column = 0)
+    historial = tk.Button(frames["opciones"], text = "Ver historial", command = lambda: ver_historial(vistos))
+    historial.grid(row = 3, column = 0)
     # Favoritos
-    favoritos = tk.Button(options_f, text = "Videos Favoritos", command = lambda: ver_favoritos(favo)) #CARLOS
-    favoritos.grid(row = 3, column = 0)#CARLOS
+    favoritos = tk.Button(frames["opciones"], text = "Videos Favoritos", command = lambda: ver_favoritos(favo)) #CARLOS
+    favoritos.grid(row = 4, column = 0)#CARLOS
 
 # ----- END INTERFAZ ----- #
 
@@ -470,7 +487,7 @@ def n_videos(week, vistos, n=5):
         return None
 
 
-def ver_videos_recomendados(week, vistos, favoritos):
+def ver_videos_recomendados(week, frames: dict, vistos, favoritos):
     print("favoritos2: " + str(favoritos))
     print("vistos2: " + str(vistos))
     '''
@@ -489,6 +506,7 @@ def ver_videos_recomendados(week, vistos, favoritos):
     None.
 
     '''
+    
     play_button_list = []
     title_label_list = []
     thumbnail_list = []
@@ -507,15 +525,15 @@ def ver_videos_recomendados(week, vistos, favoritos):
     #     tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
     #     return
 
-    newWindow = tk.Toplevel()
-    newWindow.title("Videos recomendados")
-    newWindow.geometry("500x700")
+    #newWindow = tk.Toplevel()
+    #newWindow.title("Videos recomendados")
+    #newWindow.geometry("500x700")
 
-    title = tk.Label(newWindow, text="Recomendaciones para este bloque:", font=("Verdana", 12))
-    title.pack(pady = 8)
+    #title = tk.Label(frame, text="Recomendaciones para este bloque:", font=("Verdana", 12))
+    #title.pack(pady = 8)
 
     i = 0
-    vid_grid = tk.Frame(newWindow)
+    vid_grid = frames["recomendados"]
 
     for vid in lista_videos:
         u = urlopen(vid['snippet']['thumbnails']['default']['url'])
@@ -541,8 +559,11 @@ def ver_videos_recomendados(week, vistos, favoritos):
 
         i += 2
 
-
-    vid_grid.pack()
+    #vid_grid.pack()
+    frames["aux"].grid_forget()
+    frames["aux"] = frames["recomendados"]
+    frames["aux"].grid(row = 0, column = 1)
+    #vid_grid.pack()
 
     # #print(video['snippet']['thumbnails']['default']['url'])
     # u = urlopen(video['snippet']['thumbnails']['default']['url'])
