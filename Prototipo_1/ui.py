@@ -164,7 +164,7 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
     create_optionMenu_gadgets(frame, gadgets, materias, week, update = False)
 
 # Crear ventana que muestra el historial (desde create_option_buttons)   FABIAN
-def ver_historial(frames, vistos: vistos.ListaVistos):
+def ver_historial(frames, vistos: vistos.ListaVistos,index = 0):
     # Crear nueva ventana
     #top = tk.Toplevel()
     #top.title("Historial")
@@ -178,7 +178,7 @@ def ver_historial(frames, vistos: vistos.ListaVistos):
     label.grid(row = 0, column = 0)
 
     # Mostrar info de video en pantalla
-    video = vistos.getVistos()[0]   # Por test es solo el primero
+    video = vistos.getVistos()[index]   # Por test es solo el primero
 
     # Obtener thumbnail video
     u = urlopen(video['snippet']['thumbnails']['default']['url'])
@@ -195,26 +195,46 @@ def ver_historial(frames, vistos: vistos.ListaVistos):
     # Mostrar titulo del video
     title = tk.Label(frames["historial"], text=video['snippet']['title'])
     title.grid(row = 2, column = 1)
-
+    
+    indexAnterior = index - 1
+    indexSiguiente = index + 1
+    
+    if indexAnterior < 0:
+        indexAnterior = vistos.getTam() - 1
+    
+    if indexSiguiente >= vistos.getTam():
+        print("ocurre")
+        indexSiguiente = 0
+    
+    print(indexSiguiente)
+    
     # Botones de accion
-    next_b = tk.Button(frames["historial"], text = "Siguiente")
+    next_b = tk.Button(frames["historial"], text = "Siguiente", command = lambda: ver_historial(frames, vistos,indexSiguiente))
     next_b.grid(row = 3, column = 2)
 
-    back_b = tk.Button(frames["historial"], text = "Anterior")
+    back_b = tk.Button(frames["historial"], text = "Anterior", command = lambda: ver_historial(frames, vistos,indexAnterior))
     back_b.grid(row = 3, column = 0)
 
     play_b = tk.Button(frames["historial"], text = "Play",
     command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
     play_b.grid(row = 3, column = 1)
+    
+    delete_b = tk.Button(frames["historial"], text = "Delete",
+    command = lambda: deleteHistorial(frames, vistos,video))
+    delete_b.grid(row = 3, column = 3)
 
     frames["aux"].grid_forget()
     frames["aux"] = frames["historial"]
     frames["aux"].grid(row = 0, column = 1)
     
 #############################################################################################################
+    
+def deleteHistorial(frames, vistos, video):
+    vistos.delete(video)
+    ver_historial(frames, vistos)
 
 # Crear ventana que muestra los favoritos (desde create_option_buttons) CARLOS
-def ver_favoritos(frames, favoritos):
+def ver_favoritos(frames, favoritos, index = 0):
     
     if len(favoritos.getFavoritos()) == 0:
         tk.messagebox.showinfo("Sin videos", "No hay ningun video en tu lista de favoritos")
@@ -230,7 +250,7 @@ def ver_favoritos(frames, favoritos):
     label.grid(row = 0, column = 0)
 
     # Mostrar info de video en pantalla
-    video = favoritos.getFavoritos()[0]   # Por test es solo el primero
+    video = favoritos.getFavoritos()[index]   # Por test es solo el primero
 
     # Obtener thumbnail video
     u = urlopen(video['snippet']['thumbnails']['default']['url'])
@@ -247,12 +267,24 @@ def ver_favoritos(frames, favoritos):
     # Mostrar titulo del video
     title = tk.Label(frame, text=video['snippet']['title'])
     title.grid(row = 2, column = 1)
-
+    
+    indexAnterior = index - 1
+    indexSiguiente = index + 1
+    
+    if indexAnterior < 0:
+        indexAnterior = favoritos.getTam() - 1
+    
+    print(str(indexSiguiente) + " > " + str(favoritos.getTam()))
+    if indexSiguiente >= favoritos.getTam():
+        print("ocurre")
+        indexSiguiente = 0
+    
+    print(indexSiguiente)
     # Botones de accion
-    next_b = tk.Button(frame, text = "Siguiente")
+    next_b = tk.Button(frame, text = "Siguiente", command = lambda: ver_favoritos(frames, favoritos,indexSiguiente))
     next_b.grid(row = 3, column = 2)
 
-    back_b = tk.Button(frame, text = "Anterior")
+    back_b = tk.Button(frame, text = "Anterior", command = lambda: ver_favoritos(frames, favoritos,indexAnterior))
     back_b.grid(row = 3, column = 0)
 
     play_b = tk.Button(frame, text = "Play",
@@ -260,7 +292,7 @@ def ver_favoritos(frames, favoritos):
     play_b.grid(row = 3, column = 1)
     
     delete_b = tk.Button(frame, text = "Delete",
-    command = favoritos.deleteFavoritos(video))
+    command = lambda: deleteFavoritos(frames, favoritos,video))
     delete_b.grid(row = 3, column = 3)
 
     frames["aux"].grid_forget()
@@ -289,6 +321,9 @@ def addFavoritos(favoritos,video): #CARLOS
     if not (video in favoritos):
         favoritos.add(video)
 
+def deleteFavoritos(frames, favoritos, video):
+    favoritos.deleteFavoritos(video)
+    ver_favoritos(frames, favoritos)
 
 ###################################################################################################################
 

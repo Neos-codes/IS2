@@ -15,3 +15,9 @@ class ListaVistos:
 
     def getVistos(self):
         return self.vistos
+    
+    def getTam(self):
+        return len(self.vistos)
+    
+    def delete(self,element):
+        self.vistos.remove(element)

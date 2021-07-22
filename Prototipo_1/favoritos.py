@@ -19,3 +19,6 @@ class ListaFav:
     
     def deleteFavoritos(self,element):
         self.favoritos.remove(element)
+        
+    def getTam(self):
+        return len(self.favoritos)
