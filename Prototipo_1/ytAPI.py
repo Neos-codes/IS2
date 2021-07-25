@@ -1,6 +1,9 @@
 from googleapiclient.discovery import build
 import re
 
+_cmp = {k: f"(?:(?P<{k}>\d+){k.upper()})?" for k in 'YMWDhms'}
+_DURATION_PATTERN = re.compile("P{Y}{M}{W}{D}(?:T{h}{m}{s})?".format_map(_cmp))
+
 try:
     API_KEY = open('key', 'r').read().strip()
 except FileNotFoundError:
@@ -58,17 +61,19 @@ def video_search(busqueda, duracion=None, cache=VideoCache()):
     yield next(video_gen)
 
 
-duration_pattern = re.compile(r"PT(?:(?P<h>\d+)H)?(?:(?P<m>\d+)M)?(?:(?P<s>\d+)S)?")
 def get_durations(video_iterable):
     video_ids = [v['id']['videoId'] for v in video_iterable]
     res = yt.videos().list(id=video_ids, part="contentDetails").execute()
     video_durations_str = [v['contentDetails']['duration'] for v in res['items']]
     for v in res['items']:
         duration_str = v['contentDetails']['duration']
-        match = duration_pattern.search(duration_str)
-        h, m, s = [0 if i is None else int(i) for i in match.groups()]
-        yield h * 60 + m + s / 60.0
-
+        match = _DURATION_PATTERN.search(duration_str)
+        Y = match.group('Y')
+        total = 0 if Y is None else int(Y)
+        for f, t in zip([12, 365 / 12 / 7, 7, 24, 60, 60], match.groups()[1:]):
+            total *= f
+            total += 0 if t is None else int(t)
+        yield total / 60
 
 
 def youtube_search(arg):
