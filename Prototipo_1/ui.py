@@ -644,8 +644,11 @@ def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
         title_label.grid(column=0, row=i+1, columnspan=2, pady=(0, 15))
 
         button = tk.Button(vid_grid, text="Play",
-                           command=lambda v=vid: play_video(v, vistos))
+                           command=lambda v=vid: play_video(v, vistos,favoritos))
         button.grid(column=1, row=i)
+        
+        button2 = tk.Button(vid_grid, text = "Añadir a favoritos", command = lambda v = vid: addFavoritos(favoritos, v))
+        button2.grid(column = 2, row = i)
 
         i += 2
     button = tk.Button(vid_grid, text="Ver más",
