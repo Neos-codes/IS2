@@ -17,23 +17,11 @@ def test():
 
     return hrs_days
 
-def graphical_ui(week):
+def graphical_ui(week): #Recibir usuarios en vez de week
     # ----- Ventana ----- #
-
-    vistos = week.get_vistos()
-    favoritos = week.get_favoritos()
+   
     # Aqui iran los frames
     frames = {}
-
-    # Aqui van los gadgets de la matriz horarios
-    h_gadgets = []
-
-    # Aqui los labels de los días y las horas del horario
-    labels_days = []
-    labels_hrs = []
-
-    # TO DO: ESTO ES UN TEST, BORRAR EVENTUALMENTE
-    hrs_days = test()
 
     # Crear Ventana
     w = ui.create_window()
@@ -41,17 +29,13 @@ def graphical_ui(week):
     # Crear frames
     ui.create_frames(w, frames)
 
-    # Llenar grid de Horario luego de crear frames
-    ui.horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
-
-    # Crear botones de opciones
-    ui.create_option_buttons(frames, week, h_gadgets, vistos,favoritos)
+    #Ingresar usuario
+    ui.ingresar_usuario(frames)
 
     # Loop de ejecución de la ventana
     w.mainloop()
 
     # ----- END VENTANA ----- #
-
 
 def cmd_ui(week):
     vistos = week.get_vistos()

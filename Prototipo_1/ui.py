@@ -2,6 +2,7 @@ from recomendar import recomendar_un_video
 import horario
 import time
 import vistos
+import usuario
 import favoritos as fav
 import tkinter as tk
 from tkinter import messagebox
@@ -26,13 +27,19 @@ def create_window():
 
 # Crear Frames (desde main) FABIAN
 def create_frames(window, frames: dict):
-    # Para el horario (Por defecto a la derecha)
-    horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
-    horario.grid(row = 0, column = 1)
-    frames["horario"] = horario
+    # Para ingresar usuario
+    usuario_f = tk.LabelFrame(window, text = "Ingresar Usuario", padx = 5, pady = 5)
+    frames["usuario"] = usuario_f
+    usuario_f.grid(row = 0, column = 1)
 
     # Frame auxiliar, por defecto es siempre el horario
-    frames["aux"] = horario
+    frames["aux"] = usuario_f
+
+
+    # Para el horario (Por defecto a la derecha)
+    horario = tk.LabelFrame(window, text = "Horario", padx = 5, pady = 5)
+    #horario.grid(row = 0, column = 1)
+    frames["horario"] = horario
 
     # Para los botones de opciones
     options = tk.LabelFrame(window, text = "Opciones", padx = 5, pady = 5)
@@ -50,6 +57,55 @@ def create_frames(window, frames: dict):
     # Para videos favoritos
     favoritos_f = tk.LabelFrame(window, text = "Videos Favoritos", padx = 5, pady = 5)
     frames["favoritos"] = favoritos_f
+
+    
+
+def entrar_usuario(frames, usuario):
+
+     week = usuario.week
+    # Aqui van los gadgets de la matriz horarios
+     h_gadgets = []
+
+     # Aqui los labels de los días y las horas del horario
+     labels_days = []
+     labels_hrs = []
+
+     # TO DO: ESTO ES UN TEST, BORRAR EVENTUALMENTE
+     #hrs_days = test()
+     vistos = week.get_vistos()
+     favoritos = week.get_favoritos()
+
+     # Llenar grid de Horario luego de crear frames
+     horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
+     frames["aux"].grid_forget()
+     frames["aux"]=frames["horario"]
+     frames["aux"].grid(row=0, column=1)
+
+     # Crear botones de opciones
+     create_option_buttons(frames, week, h_gadgets, vistos,favoritos)
+
+def crear_usuario(frames,n,p):
+     u = usuario.Usuario(n,p)
+     entrar_usuario(frames, u)
+
+
+#def comparar_usuario():
+    #comparar con Pickle
+
+def ingresar_usuario(frames):
+     frame = frames["usuario"]
+     l = tk.Label(frame, text="a")
+     l.grid(row = 0, column = 0)
+     nombre = tk.Entry(frame, width = 30)
+     nombre.grid(row = 1, column = 0)
+     password = tk.Entry(frame, width = 30)
+     password.grid(row = 0, column = 1)
+     n = nombre.get()
+     p = password.get()
+     
+     #btn1 = tk.Button(frame, text = "Ingresar", command = lambda: comparar_usuario(frames,n,p))
+     btn2 = tk.Button(frame, text = "Crear nuevo", command = lambda: crear_usuario(frames,n,p))
+     btn2.grid(row = 2, column = 0) 
 
 # Se usa en create_option_buttons  FABIAN
 def ver_horario(frames):
@@ -548,6 +604,7 @@ def n_videos(week, vistos, n=5, temp=[]):
         return videos
     else:
         return None
+
 
 # nueva version de ver_videos_recomendados()
 def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
