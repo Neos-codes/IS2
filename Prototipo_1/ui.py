@@ -526,7 +526,7 @@ def play_video(video, vistos: vistos.ListaVistos,favoritos):
     
     #ventanaFavoritos(favoritos, video) #CARLOS
 
-def n_videos(week, vistos, n=5):
+def n_videos(week, vistos, n=5, temp=[]):
     datetime = time.struct_time(time.localtime())
     # horario = next(h for h in week.week_iterator(datetime.tm_wday, datetime.tm_hour-1) if h)
     hr = datetime.tm_hour-8
@@ -540,7 +540,7 @@ def n_videos(week, vistos, n=5):
         videos = []
         while n:
             video = next(search)
-            if video not in vistos:
+            if video not in vistos and video not in temp:
                 # video['materia'] = materia
                 videos.append(video)
                 n -= 1
@@ -549,107 +549,55 @@ def n_videos(week, vistos, n=5):
     else:
         return None
 
-
-def ver_videos_recomendados(week, frames: dict, vistos, favoritos):
-    #print("favoritos2: " + str(favoritos))
-    #print("vistos2: " + str(vistos))
-    '''
-    Abre una ventana que muestra una lista de videos recomendados, de acuerdo
-    a la materia asignada al bloque de hora correspondiente al del momento.
-
-    Parameters
-    ----------
-    week : TYPE
-        DESCRIPTION.
-    vistos : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    None.
-
-    '''
-    
-    play_button_list = []
-    title_label_list = []
-    thumbnail_list = []
+# nueva version de ver_videos_recomendados()
+def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
     if not week:
         #error message
         return
 
-    lista_videos = n_videos(week, vistos)
+    lista_videos = n_videos(week, vistos, temp=temp)
+    temp.extend(lista_videos)
 
     if lista_videos is None:
-        tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
+        tk.messagebox.showwarning(
+            "Error", "No tiene ninguna materia asignada para esta hora")
         return
-
-    # video = get_video_b(week, vistos)
-    # if video is None:
-    #     tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
-    #     return
-
-    #newWindow = tk.Toplevel()
-    #newWindow.title("Videos recomendados")
-    #newWindow.geometry("500x700")
-
-    #title = tk.Label(frame, text="Recomendaciones para este bloque:", font=("Verdana", 12))
-    #title.pack(pady = 8)
 
     i = 0
     vid_grid = frames["recomendados"]
+
+    if temp is not []:
+        for widget in vid_grid.winfo_children():
+            widget.destroy()
 
     for vid in lista_videos:
         u = urlopen(vid['snippet']['thumbnails']['default']['url'])
         raw_data = u.read()
         u.close()
         img = Image.open(BytesIO(raw_data))
-        #img = img.resize((250, 250))
         img = ImageTk.PhotoImage(img)
+
+        # El siguiente par de lineas puede parecer redundante pero es necesario
         thumbnail_label = tk.Label(vid_grid, image=img)
         thumbnail_label.image = img
-        thumbnail_list.append(thumbnail_label)
-        thumbnail_label.grid(column = 0, row = i, sticky='e')
 
+        thumbnail_label.grid(column=0, row=i, sticky='e')
 
         title_label = tk.Label(vid_grid, text=vid['snippet']['title'])
-        title_label_list.append(title_label)
-        title_label.grid(column = 0, row = i+1, columnspan=2, pady = (0, 15))
+        title_label.grid(column=0, row=i+1, columnspan=2, pady=(0, 15))
 
         button = tk.Button(vid_grid, text="Play",
-                       command = lambda v = vid: play_video(v, vistos, favoritos))
-        play_button_list.append(button)
-        button.grid(column = 1, row = i)
-
-        button2 = tk.Button(vid_grid, text = "Añadir a favoritos", command = lambda v = vid: addFavoritos(favoritos, v))
-        button2.grid(column = 2, row = i)
+                           command=lambda v=vid: play_video(v, vistos))
+        button.grid(column=1, row=i)
 
         i += 2
-
-    #vid_grid.pack()
+    button = tk.Button(vid_grid, text="Ver más",
+                       command=lambda temp_=temp: ver_videos_recomendados(week, frames, vistos, favoritos, temp=temp_))
+    button.grid(column=0, row=i, columnspan=2)
+    # vidRecFrame.pack()
     frames["aux"].grid_forget()
     frames["aux"] = frames["recomendados"]
     frames["aux"].grid(row = 0, column = 1)
-    #vid_grid.pack()
-
-    # #print(video['snippet']['thumbnails']['default']['url'])
-    # u = urlopen(video['snippet']['thumbnails']['default']['url'])
-    # raw_data = u.read()
-    # u.close()
-    # #print(raw_data)
-
-    # img = Image.open(BytesIO(raw_data))
-    # #img = img.resize((250, 250))
-    # img = ImageTk.PhotoImage(img)
-    # thumbnail_label = tk.Label(newWindow, image=img)
-    # thumbnail_label.image = img
-    # thumbnail_label.pack()
-
-    # label1 = tk.Label(newWindow, text=video['snippet']['title'])
-    # label1.pack()
-
-    # button = tk.Button(newWindow, text="Play",
-    #                    command = lambda: webbrowser.open(f"https://www.youtube.com/watch?v={video['id']['videoId']}"))
-    # button.pack()
 
 
 def boof() :
