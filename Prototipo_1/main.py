@@ -58,8 +58,8 @@ def cmd_ui(week):
 def main(gui=True):
     ##print(gui)
     if gui is True:
-        graphical_ui() # Probando mas de una sesion
-        graphical_ui() # a la mala ...
+        #graphical_ui() # Probando mas de una sesion
+        #graphical_ui() # a la mala ...
         return graphical_ui()
     # if gui is False:
     #     print(2)
