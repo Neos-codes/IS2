@@ -120,7 +120,8 @@ def comparar_usuario(frames, n: Entry, p: Entry):
     if u.check_password(p):
         entrar_usuario(frames, u)
     else:
-        print('Usuario no existe o contraseña incorrecta')
+        #print('Usuario no existe o contraseña incorrecta')
+        tk.messagebox.showerror("Error de login", "Usuario inexistente o contraseña incorrecta")
         pass
 
 def ingresar_usuario(frames):
