@@ -655,13 +655,13 @@ def ver_videos_recomendados(week, frames, vistos, favoritos, offset=0):
         return
 
     lista_videos = n_videos(week, vistos, offset=offset)
-    offset += len(lista_videos )
 
     if lista_videos is None:
         tk.messagebox.showwarning(
             "Error", "No tiene ninguna materia asignada para esta hora")
         return
 
+    offset += len(lista_videos)
     get_thumbnails(lista_videos) # Los thumbnails son agregadoes a snippet thumbnails default image como clase PIL.Image.Image
 
     i = 0
