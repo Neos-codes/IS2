@@ -36,6 +36,8 @@ def graphical_ui(): #Recibir usuarios en vez de week
     # Loop de ejecución de la ventana
     w.mainloop()
 
+    ui.set_active_user(None)
+
     # ----- END VENTANA ----- #
 
 def cmd_ui(week):

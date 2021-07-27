@@ -14,14 +14,29 @@ class Usuario:
     hash: bytes
 
     def __init__(self, nombre):
-        self.week = Week()
-        self.usuario = nombre
+        save_path = f"{nombre}.pickle"
+        if exists(save_path):
+            try:
+                with open(save_path, 'rb') as file:
+                    saved_user: Usuario = load(file)
+                    self.week = saved_user.week
+                    self.nombre = saved_user.nombre
+                    self.hash = saved_user.hash
+            except Exception:
+                print('Error de carga.')
+                bck_save_path = save_path + '.bck'
+                if exists(bck_save_path):
+                    remove(bck_save_path)
+                rename(save_path, bck_save_path)
+        if not hasattr(self, 'week'):
+            self.week = Week()
+        if not hasattr(self, 'nombre'):
+            self.nombre = nombre
 
     # Retorna falso si la contraseña es incorrecta o el usuario no existe
     def check_password(self, password: str) -> bool:
         hashed_message = digest(password.encode(), _MESSAGE, 'sha512')
         if hasattr(self, 'hash') and compare_digest(self.hash, hashed_message):
-            self._save = True
             return True
         return False
 
@@ -31,56 +46,25 @@ class Usuario:
             return False
         else:
             self.hash = digest(password.encode(), _MESSAGE, 'sha512')
-            self._save = True
             return True
 
-
-class SaveManager:
-    usuario: Usuario
-    def __init__(self, nombre):
-        self.nombre = nombre
-        self.save_path = f'{nombre}.pickle'
-
-    def __enter__(self) -> Usuario:
-        if exists(self.save_path):
-            try:
-                with open(self.save_path, 'rb') as file:
-                    self.usuario = load(file)
-                    if not hasattr(self.usuario, 'week'):
-                        self.usuario.week = Week()
-                    if not hasattr(self.usuario, 'lista_vistos'):
-                        self.usuario.week.lista_vistos = ListaVistos()
-                    if not hasattr(self.usuario, 'lista_favoritos'):
-                        self.usuario.week.lista_vistos = ListaVistos()
-
-            except Exception:
-                print('Error de carga.')
-                bck_save_path = '~' + self.save_path
-                if exists(bck_save_path):
-                    remove(bck_save_path)
-                rename(self.save_path, bck_save_path)
-                self.usuario = Usuario(self.nombre)
-        else:
-            self.usuario = Usuario(self.nombre)
-        return self.usuario
-
-    def __exit__(self, *args):
-        if hasattr(self.usuario, '_save'):
-            delattr(self.usuario, '_save')
-            bck_path = self.save_path + '.bck'
-            if exists(self.save_path):
+    def save(self):
+        if hasattr(self, 'hash'):
+            save_path = f"{self.nombre}.pickle"
+            bck_path = save_path + '.bck'
+            if exists(save_path):
                 if exists(bck_path):
                     remove(bck_path)
-                rename(self.save_path, bck_path)
+                rename(save_path, bck_path)
             try:
-                with open(self.save_path, 'wb') as file:
-                    dump(self.usuario, file)
+                with open(save_path, 'wb') as file:
+                    dump(self, file)
             except Exception:
                 print("Error de guardado.")
-                if exists(self.save_path):
-                    remove(self.save_path)
+                if exists(save_path):
+                    remove(save_path)
                 if exists(bck_path):
-                    rename(bck_path, self.save_path)
+                    rename(bck_path, save_path)
             finally:
                 if exists(bck_path):
                     remove(bck_path)

@@ -19,6 +19,19 @@ days_names = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Do
 hours_day = list(range(8, 21))
 vistos_index = 0
 
+_ACTIVE_USER: usuario.Usuario = None
+
+def set_active_user(user: usuario.Usuario):
+    global _ACTIVE_USER
+    if _ACTIVE_USER is not None:
+        _ACTIVE_USER.save()
+    _ACTIVE_USER = user
+
+def get_active_user() -> usuario.Usuario:
+    global _ACTIVE_USER
+    return _ACTIVE_USER
+
+
 # Crear ventana (desde main)  FABIAN
 def create_window():
     window = tk.Tk()
@@ -64,6 +77,7 @@ def create_frames(window, frames: dict):
 
 def entrar_usuario(frames, usuario: usuario.Usuario):
 
+    set_active_user(usuario)
     week = usuario.week
     # Precargar busquedas
     prefetch_materias(*week.materias)
@@ -91,23 +105,23 @@ def entrar_usuario(frames, usuario: usuario.Usuario):
 def crear_usuario(frames, n: Entry,p: Entry):
     n = n.get()
     p = p.get()
-    with usuario.SaveManager(n) as u:
-        if u.set_password(p):
-            entrar_usuario(frames, u)
-        else:
-            print('Usuario no se pudo crear')
-            pass
+    u = usuario.Usuario(n)
+    if u.set_password(p):
+        entrar_usuario(frames, u)
+    else:
+        print('Usuario no se pudo crear')
+        pass
 
 
 def comparar_usuario(frames, n: Entry, p: Entry):
     n = n.get()
     p = p.get()
-    with usuario.SaveManager(n) as u:
-        if u.check_password(p):
-            entrar_usuario(frames, u)
-        else:
-            print('Usuario no existe o contraseña incorrecta')
-            pass
+    u = usuario.Usuario(n)
+    if u.check_password(p):
+        entrar_usuario(frames, u)
+    else:
+        print('Usuario no existe o contraseña incorrecta')
+        pass
 
 def ingresar_usuario(frames):
     frame = frames["usuario"]
@@ -606,7 +620,7 @@ def play_video(video, vistos: vistos.ListaVistos,favoritos):
 
     #ventanaFavoritos(favoritos, video) #CARLOS
 
-def n_videos(week, vistos, n=5, temp=[]):
+def n_videos(week, vistos, n=5, offset=0):
     datetime = time.struct_time(time.localtime())
     # horario = next(h for h in week.week_iterator(datetime.tm_wday, datetime.tm_hour-1) if h)
     hr = datetime.tm_hour-8
@@ -620,10 +634,14 @@ def n_videos(week, vistos, n=5, temp=[]):
         videos = []
         while n:
             video = next(search)
-            if video not in vistos and video not in temp:
-                # video['materia'] = materia
-                videos.append(video)
-                n -= 1
+            if video not in vistos and video:
+                if offset:
+                    offset -= 1
+                else:
+                    # video['materia'] = materia
+                    videos.append(video)
+                    n -= 1
+
 
         return videos
     else:
@@ -631,13 +649,13 @@ def n_videos(week, vistos, n=5, temp=[]):
 
 
 # nueva version de ver_videos_recomendados()
-def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
+def ver_videos_recomendados(week, frames, vistos, favoritos, offset=0):
     if not week:
         #error message
         return
 
-    lista_videos = n_videos(week, vistos, temp=temp)
-    temp.extend(lista_videos)
+    lista_videos = n_videos(week, vistos, offset=offset)
+    offset += len(lista_videos )
 
     if lista_videos is None:
         tk.messagebox.showwarning(
@@ -646,24 +664,8 @@ def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
 
     get_thumbnails(lista_videos) # Los thumbnails son agregadoes a snippet thumbnails default image como clase PIL.Image.Image
 
-    # video = get_video_b(week, vistos)
-    # if video is None:
-    #     tk.messagebox.showwarning("Error", "No tiene ninguna materia asignada para esta hora")
-    #     return
-
-    #newWindow = tk.Toplevel()
-    #newWindow.title("Videos recomendados")
-    #newWindow.geometry("500x700")
-
-    #title = tk.Label(frame, text="Recomendaciones para este bloque:", font=("Verdana", 12))
-    #title.pack(pady = 8)
-
     i = 0
     vid_grid = frames["recomendados"]
-
-    if temp is not []:
-        for widget in vid_grid.winfo_children():
-            widget.destroy()
 
     for vid in lista_videos:
         # u = urlopen(vid['snippet']['thumbnails']['default']['url'])
@@ -692,7 +694,7 @@ def ver_videos_recomendados(week, frames, vistos, favoritos, temp=[]):
 
         i += 2
     button = tk.Button(vid_grid, text="Ver más",
-                       command=lambda temp_=temp: ver_videos_recomendados(week, frames, vistos, favoritos, temp=temp_))
+                       command=lambda: ver_videos_recomendados(week, frames, vistos, favoritos, offset=offset))
     button.grid(column=0, row=i, columnspan=2)
     # vidRecFrame.pack()
     frames["aux"].grid_forget()

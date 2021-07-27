@@ -80,8 +80,8 @@ class YoutubeSearch:
             if i == size:
                 self._size_update.wait()
             else:
-                for id in self.indice[i:size]:
-                    yield self.resultados[id]
+                for i in range(i, size):
+                    yield self[i]
                 i = size
 
     @property
