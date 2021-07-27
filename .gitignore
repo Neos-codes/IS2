@@ -1,5 +1,5 @@
-.spyproject
-**/__pycache__
-.vscode
-**/key
-**/*.pickle
+/**/.spyproject
+/**/__pycache__
+/**/.vscode
+/**/key
+/**/*.pickle

@@ -1,12 +1,6 @@
-from inspect import ArgInfo
-from pickle import load, dump
-from os.path import exists
-from os import rename, remove
 from recomendar import recomendar_un_video
 from vistos import ListaVistos
 from favoritos import ListaFav
-import time
-import random
 
 
 DAYS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]
@@ -157,49 +151,3 @@ class Week:
     #CAMBIO
     def get_favoritos(self):
         return self.lista_favoritos
-
-
-class SaveManager:
-    def __init__(self, save_path="week.pickle"):
-        self.save_path = save_path
-        self.week = None
-
-    def __enter__(self):
-        if self.week is None:
-            if exists(self.save_path):
-                try:
-                    with open(self.save_path, 'rb') as file:
-                        self.week = load(file)
-                        if not hasattr(self.week, 'lista_vistos'):
-                            self.week.lista_vistos = ListaVistos()
-                            self.week.lista_favoritos = ListaFav()
-                except Exception:
-                    print('Error de carga.')
-                    bck_save_path = '~' + self.save_path
-                    if exists(bck_save_path):
-                        remove(bck_save_path)
-                    rename(self.save_path, bck_save_path)
-                    self.week = Week()
-            else:
-                self.week = Week()
-        assert self.week is not None
-        return self.week
-
-    def __exit__(self, *args):
-        bck_path = self.save_path + '.bck'
-        if exists(self.save_path):
-            if exists(bck_path):
-                remove(bck_path)
-            rename(self.save_path, bck_path)
-        try:
-            with open(self.save_path, 'wb') as file:
-                dump(self.week, file)
-        except Exception:
-            print("Error de guardado.")
-            if exists(self.save_path):
-                remove(self.save_path)
-            if exists(bck_path):
-                rename(bck_path, self.save_path)
-        finally:
-            if exists(bck_path):
-                remove(bck_path)

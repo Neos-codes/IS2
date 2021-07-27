@@ -1,4 +1,8 @@
 from googleapiclient.discovery import build
+from threading import Condition, Event, Lock, Thread, Semaphore, get_ident
+from PIL import Image
+from urllib.request import urlopen
+from io import BytesIO
 import re
 
 _cmp = {k: f"(?:(?P<{k}>\d+){k.upper()})?" for k in 'YMWDhms'}
@@ -17,64 +21,194 @@ except FileNotFoundError:
 finally:
     yt = build('youtube', 'v3', developerKey=API_KEY)
 
-class VideoCache:
-    def __init__(self):
-        self.busquedas = dict()
-    def __contains__(self, args):
-        busqueda, duracion = args
-        return busqueda in self.busquedas and duracion in self.busquedas[busqueda]
-    def get(self, busqueda, duracion):
-        return self.busquedas[busqueda][duracion]
-    def set(self, busqueda, duracion, generator):
-        if busqueda not in self.busquedas:
-            self.busquedas[busqueda] = {duracion: generator}
+
+class YoutubeSearch:
+    _materias = dict()
+    _search = yt.search()
+    _videos = yt.videos()
+    _req_limiter = Semaphore(value=1)
+    materia: str
+    _background_thread: Thread
+    _target_update: Event
+    _size_update: Event
+    _target_lock: Lock
+    _size_lock: Lock
+    _target_size: int
+    _size: int
+    resultados: dict
+    indice: list
+    _EXCEPTIONS = {}
+
+    @classmethod
+    def prefetch(cls, *materias):
+        for materia in materias:
+            cls(materia)
+
+    def __new__(cls, materia: str):
+        if materia not in cls._materias:
+            self: cls = super().__new__(cls)
+            self.materia = materia
+            self._target_update = Event()
+            self._size_update = Event()
+            self._target_lock = Lock()
+            self._size_lock = Lock()
+            self._target_size = 0
+            self._size = 0
+            self.resultados = dict()
+            self.indice = list()
+            cls._materias[materia] = self
+        return cls._materias[materia]
+
+    def __init__(self, materia):
+        if not hasattr(self, '_background_thread') or not self._background_thread.is_alive():
+            if self.materia in self._EXCEPTIONS:
+                e = self._EXCEPTIONS.pop(self.materia)
+                raise e
+            else:
+                self._background_thread = Thread(
+                    target=self._bgupdate, daemon=True)
+                self._background_thread.start()
+
+    def __len__(self):
+        with self._size_lock:
+            return self._size
+
+    def __iter__(self):
+        i = 0
+        while self._background_thread.is_alive():
+            size = len(self)
+            if i == size:
+                self._size_update.wait()
+            else:
+                for id in self.indice[i:size]:
+                    yield self.resultados[id]
+                i = size
+
+    @property
+    def _target(self):
+        with self._target_lock:
+            self._target_update.clear()
+            return self._target_size
+
+    @_target.setter
+    def _target(self, value):
+        with self._target_lock:
+            if value + 10 > self._target_size:
+                self._target_size = value + 10
+                self._target_update.set()
+
+    def _bgupdate(self):
+        try:
+            self._target_size = 10
+            token = self._next(count=10)
+            while token is not None:
+                if self._size < self._target:
+                    self._size_update.clear()
+                    token = self._next(token=token)
+                else:
+                    get_thumbnails(self.resultados.values())
+                    self._target_update.wait()
+            self._size_update.set()
+        except Exception as e:
+            self._EXCEPTIONS[self.materia] = e
+            return
+
+    def _next(self, count=10, token=None):
+        with self._req_limiter:
+            print(f'Fetch materia:{self.materia} token:{token}')
+            res = self._search.list(q=self.materia, part="id, snippet",
+                                    type="video", maxResults=count,
+                                    pageToken=token).execute()
+        items = ((item['id']['videoId'], item) for item in res['items'])
+        new_items = {id: item for id, item in items if id not in self.resultados}
+        new_ids = list(new_items.keys())
+        if new_ids:
+            self._get_durations(new_items)
+            self.resultados.update(new_items)
+            self.indice += new_ids
+            with self._size_lock:
+                self._size = len(self.resultados)
+                self._size_update.set()
+        if 'nextPageToken' in res:
+            return res['nextPageToken']
         else:
-            self.busquedas[busqueda][duracion] = generator
+            return None
+
+    @classmethod
+    def _get_durations(cls, items):
+        assert items
+        with cls._req_limiter:
+            print(f'Fetch duraciones')
+            res = cls._videos.list(id=list(items.keys()), part="contentDetails").execute()
+        for item in res['items']:
+            id = item['id']
+            match = _DURATION_PATTERN.search(item['contentDetails']['duration'])
+            Y = match.group('Y')
+            total = 0 if Y is None else int(Y)
+            for f, t in zip([12, 365 / 12 / 7, 7, 24, 60, 60], match.groups()[1:]):
+                total *= f
+                total += 0 if t is None else int(t)
+            items[id]['duration'] = total
+
+    def __getitem__(self, index):
+        if isinstance(index, int) and index >= 0:
+            self._target = index
+            while index >= len(self):
+                if self._background_thread.is_alive():
+                    if self._size_update.wait(0.5):
+                        if self.materia in self._EXCEPTIONS:
+                            e = self._EXCEPTIONS.pop(self.materia)
+                            raise e
+                else:
+                    raise IndexError
+            return self.resultados[self.indice[index]]
+
+
+def prefetch_materias(*materias):
+    YoutubeSearch.prefetch(*materias)
+
+
+def get_thumbnail(videos: list, done_condition: Condition, take_lock: Lock, res='default') -> None:
+    while True:
+        with take_lock:
+            if videos:
+                video = videos.pop()
+            else:
+                break
+        res_dict = video['snippet']['thumbnails'][res]
+        print(f'Fetch thumbnail:{res} video:{video["snippet"]["title"]}')
+        with urlopen(res_dict['url']) as thumbnail:
+            res_dict['image'] = Image.open(BytesIO(thumbnail.read()))
+    with done_condition:
+        done_condition.notify()
+
+
+def get_thumbnails(videos: list, threads=5, res='default') -> list:
+    done_condition = Condition()
+    take_lock = Lock()
+    tasks = []
+    missing_videos = [
+        video for video in videos if 'image' not in video['snippet']['thumbnails'][res]]
+    if missing_videos:
+        with done_condition:
+            for i in range(min(threads, len(missing_videos))):
+                tasks.append(Thread(target=get_thumbnail,
+                                    args=(missing_videos, done_condition, take_lock),
+                                    kwargs={'res': res}, daemon=True))
+                tasks[-1].start()
+            done_condition.wait_for(lambda: all('image'
+                                    in v['snippet']['thumbnails'][res]
+                                    for v in videos))
+
+    return [v['snippet']['thumbnails'][res]['image'] for v in videos]
+
 
 
 def video_search_gen(busqueda, duracion=None):
-        # Diccionario
-        params = {"part": "id, snippet",
-                "q": busqueda, "type": "video"}
-        if duracion is not None:
-            assert duracion in {'short', 'medium', 'long'}
-            params["videoDuration"] = duracion
-        search = yt.search()
-        req = search.list(**params)
-        res = req.execute()
-        while True:
-            videos = res['items']
-            durations = get_durations(videos)
-            for v, d in zip(videos, durations):
-                v['duration'] = d
-                yield v
-            req = search.list_next(req, res)
-            res = req.execute()
+    yield from YoutubeSearch(busqueda)
 
-
-def video_search(busqueda, duracion=None, cache=VideoCache()):
-    if (busqueda, duracion) in cache:
-        video_gen = cache.get(busqueda, duracion)
-    else:
-        video_gen = video_search_gen(busqueda, duracion=duracion)
-        cache.set(busqueda, duracion, video_gen)
-    yield next(video_gen)
-
-
-def get_durations(video_iterable):
-    video_ids = [v['id']['videoId'] for v in video_iterable]
-    res = yt.videos().list(id=video_ids, part="contentDetails").execute()
-    video_durations_str = [v['contentDetails']['duration'] for v in res['items']]
-    for v in res['items']:
-        duration_str = v['contentDetails']['duration']
-        match = _DURATION_PATTERN.search(duration_str)
-        Y = match.group('Y')
-        total = 0 if Y is None else int(Y)
-        for f, t in zip([12, 365 / 12 / 7, 7, 24, 60, 60], match.groups()[1:]):
-            total *= f
-            total += 0 if t is None else int(t)
-        yield total / 60
-
+def video_search(busqueda, duracion=None, cache=None):
+    yield video_search_gen(busqueda)
 
 def youtube_search(arg):
     search_response = yt.search().list(

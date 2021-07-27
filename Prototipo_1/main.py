@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
-from horario import DAYS, SaveManager
+from horario import DAYS
+from ytAPI import prefetch_materias
 import ui
 
 # Esto es un test para mostrar info en el horario, borrar eventualmente
@@ -17,9 +18,9 @@ def test():
 
     return hrs_days
 
-def graphical_ui(week): #Recibir usuarios en vez de week
+def graphical_ui(): #Recibir usuarios en vez de week
     # ----- Ventana ----- #
-   
+
     # Aqui iran los frames
     frames = {}
 
@@ -52,28 +53,28 @@ def cmd_ui(week):
             return 0
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
-def main(gui=None):
+def main(gui=True):
     ##print(gui)
-    with SaveManager() as week:
-        if gui is True:
-            print(1)
-            return graphical_ui(week, week.lista_vistos)
-        if gui is False:
-            print(2)
-            return cmd_ui(week, week.lista_vistos)
-        if gui is None:
-            print(3)
+    if gui is True:
+        graphical_ui() # Probando mas de una sesion
+        graphical_ui() # a la mala ...
+        return graphical_ui()
+    # if gui is False:
+    #     print(2)
+    #     return cmd_ui(week, week.lista_vistos)
+    # if gui is None:
+    #     print(3)
+    #     return graphical_ui(week)
+        '''try:
             return graphical_ui(week)
-            '''try:
-                return graphical_ui(week)
-            except Exception:
-                print("hola2")
-                return cmd_ui'''
+        except Exception:
+            print("hola2")
+            return cmd_ui'''
 
 
 if __name__ == "__main__":
     parser = ArgumentParser('Prototipo 2')
-    parser.add_argument('--gui', action="store_true", default=None)
-    parser.add_argument('--no-gui', action="store_false", default=None, dest='gui')
+    parser.add_argument('--gui', action="store_true", default=True)
+    parser.add_argument('--no-gui', action="store_false", dest='gui')
     #print(parser)
     main(**vars(parser.parse_args()))
