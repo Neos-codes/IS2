@@ -109,7 +109,8 @@ def crear_usuario(frames, n: Entry,p: Entry):
     if u.set_password(p):
         entrar_usuario(frames, u)
     else:
-        print('Usuario no se pudo crear')
+        #print('Usuario no se pudo crear')
+        tk.messagebox.showerror("Error al crear usuario", "El nombre de usuario ya está registrado")
         pass
 
 
