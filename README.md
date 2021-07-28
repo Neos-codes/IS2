@@ -8,10 +8,18 @@ El programa consiste en una serie de archivos .py que se pueden ejecutar en cual
 
 
 ## Importante
-Usar Python 3.8.8 o superior, con versiones anteriores no es compatible debido a que no soporta emojis en los titulos o descripciones de algunos videos
+Usar Python 3.7.6 o superior, con versiones anteriores no es compatible debido a que no soporta emojis en los titulos o descripciones de algunos videos
 
 
 ## Como utilizar
+
+### Librerias que deben instalarse
+Google API
+
+
+pip install google-api-python-client pillow
+
+
 
 
 ### En Linux
