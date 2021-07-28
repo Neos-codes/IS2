@@ -14,13 +14,17 @@ Usar Python 3.7.6 o superior, con versiones anteriores no es compatible debido a
 ## Como utilizar
 
 ### Librerias que deben instalarse
+
+
 Google API
 
-* Google API *
+
 pip install google-api-python-client 
 
 
-* Pillow *
+Pillow
+
+
 pip install pillow
 
 
