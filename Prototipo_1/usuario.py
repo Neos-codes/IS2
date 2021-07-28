@@ -23,7 +23,6 @@ class Usuario:
                     self.nombre = saved_user.nombre
                     self.hash = saved_user.hash
             except Exception:
-                print('Error de carga.')
                 bck_save_path = save_path + '.bck'
                 if exists(bck_save_path):
                     remove(bck_save_path)
@@ -60,7 +59,6 @@ class Usuario:
                 with open(save_path, 'wb') as file:
                     dump(self, file)
             except Exception:
-                print("Error de guardado.")
                 if exists(save_path):
                     remove(save_path)
                 if exists(bck_path):

@@ -115,7 +115,6 @@ class YoutubeSearch:
 
     def _next(self, count=10, token=None):
         with self._req_limiter:
-            print(f'Fetch materia:{self.materia} token:{token}')
             res = self._search.list(q=self.materia, part="id, snippet",
                                     type="video", maxResults=count,
                                     pageToken=token).execute()
@@ -138,7 +137,6 @@ class YoutubeSearch:
     def _get_durations(cls, items):
         assert items
         with cls._req_limiter:
-            print(f'Fetch duraciones')
             res = cls._videos.list(id=list(items.keys()), part="contentDetails").execute()
         for item in res['items']:
             id = item['id']
@@ -176,7 +174,6 @@ def get_thumbnail(videos: list, done_condition: Condition, take_lock: Lock, res=
             else:
                 break
         res_dict = video['snippet']['thumbnails'][res]
-        print(f'Fetch thumbnail:{res} video:{video["snippet"]["title"]}')
         with urlopen(res_dict['url']) as thumbnail:
             res_dict['image'] = Image.open(BytesIO(thumbnail.read()))
     with done_condition:

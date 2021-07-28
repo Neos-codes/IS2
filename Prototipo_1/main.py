@@ -56,22 +56,8 @@ def cmd_ui(week):
 
 # Una clase "week" contiene 7 objetos "day" y 1 objeto "Materia"
 def main(gui=True):
-    ##print(gui)
     if gui is True:
-        #graphical_ui() # Probando mas de una sesion
-        #graphical_ui() # a la mala ...
         return graphical_ui()
-    # if gui is False:
-    #     print(2)
-    #     return cmd_ui(week, week.lista_vistos)
-    # if gui is None:
-    #     print(3)
-    #     return graphical_ui(week)
-        '''try:
-            return graphical_ui(week)
-        except Exception:
-            print("hola2")
-            return cmd_ui'''
 
 
 if __name__ == "__main__":

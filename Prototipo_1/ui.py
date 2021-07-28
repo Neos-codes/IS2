@@ -143,7 +143,7 @@ def ingresar_usuario(frames,h_gadgets = [],update = False):
     btn1.grid(row=2, column=1)
     btn2 = tk.Button(frame, text = "Crear nuevo", command = lambda: crear_usuario(frames, nombre, password,h_gadgets,update))
     btn2.grid(row = 2, column = 0)
-    
+
     frames["aux"].grid_forget()#CARLOS
     frames["aux"] = frame#CARLOS
     frames["aux"].grid(row = 0, column = 1)#CARLOS
@@ -152,7 +152,6 @@ def ingresar_usuario(frames,h_gadgets = [],update = False):
 # Se usa en create_option_buttons  FABIAN
 def ver_horario(frames):
     if frames["aux"] == frames["horario"]:
-        print("Ya se esta mostrando el horario")
         return
     else:
         frames["aux"].grid_forget()
@@ -304,10 +303,7 @@ def ver_historial(frames, vistos: vistos.ListaVistos,index = 0):
         indexAnterior = vistos.getTam() - 1
 
     if indexSiguiente >= vistos.getTam():
-        print("ocurre")
         indexSiguiente = 0
-
-    print(indexSiguiente)
 
     # Botones de accion
     next_b = tk.Button(frames["historial"], text = "Siguiente", command = lambda: ver_historial(frames, vistos,indexSiguiente))
@@ -375,12 +371,9 @@ def ver_favoritos(frames, favoritos, index = 0):
     if indexAnterior < 0:
         indexAnterior = favoritos.getTam() - 1
 
-    print(str(indexSiguiente) + " > " + str(favoritos.getTam()))
     if indexSiguiente >= favoritos.getTam():
-        print("ocurre")
         indexSiguiente = 0
 
-    print(indexSiguiente)
     # Botones de accion
     next_b = tk.Button(frame, text = "Siguiente", command = lambda: ver_favoritos(frames, favoritos,indexSiguiente))
     next_b.grid(row = 3, column = 2)
@@ -448,7 +441,7 @@ def create_option_buttons(frames: dict, week, gadgets, vistos, favo):
     # Favoritos
     favoritos = tk.Button(frames["opciones"], text = "Videos Favoritos", command = lambda: ver_favoritos(frames, favo)) #CARLOS
     favoritos.grid(row = 4, column = 0)#CARLOS
-    
+
     userButton = tk.Button(frames["opciones"], text = "ingresar usuario", command = lambda: ingresar_usuario(frames,gadgets,True)) #CARLOS
     userButton.grid(row = 5, column = 0)#CARLOS
 
