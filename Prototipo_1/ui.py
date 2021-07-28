@@ -75,14 +75,14 @@ def create_frames(window, frames: dict):
 
 
 
-def entrar_usuario(frames, usuario: usuario.Usuario):
+def entrar_usuario(frames, usuario: usuario.Usuario,h_gadgets = [],update = False):
 
     set_active_user(usuario)
     week = usuario.week
     # Precargar busquedas
     prefetch_materias(*week.materias)
     # Aqui van los gadgets de la matriz horarios
-    h_gadgets = []
+    #h_gadgets = []
 
     # Aqui los labels de los días y las horas del horario
     labels_days = []
@@ -94,7 +94,7 @@ def entrar_usuario(frames, usuario: usuario.Usuario):
     favoritos = week.get_favoritos()
 
     # Llenar grid de Horario luego de crear frames
-    horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs)
+    horario_fill(frames["horario"], h_gadgets, week, labels_days, labels_hrs,update)
     frames["aux"].grid_forget()
     frames["aux"]=frames["horario"]
     frames["aux"].grid(row=0, column=1)
@@ -102,30 +102,30 @@ def entrar_usuario(frames, usuario: usuario.Usuario):
     # Crear botones de opciones
     create_option_buttons(frames, week, h_gadgets, vistos,favoritos)
 
-def crear_usuario(frames, n: Entry,p: Entry):
+def crear_usuario(frames, n: Entry,p: Entry,h_gadgets = [],update = False):
     n = n.get()
     p = p.get()
     u = usuario.Usuario(n)
     if u.set_password(p):
-        entrar_usuario(frames, u)
+        entrar_usuario(frames, u,h_gadgets,update)
     else:
         #print('Usuario no se pudo crear')
         tk.messagebox.showerror("Error al crear usuario", "El nombre de usuario ya está registrado")
         pass
 
 
-def comparar_usuario(frames, n: Entry, p: Entry):
+def comparar_usuario(frames, n: Entry, p: Entry,h_gadgets = [],update = False):
     n = n.get()
     p = p.get()
     u = usuario.Usuario(n)
     if u.check_password(p):
-        entrar_usuario(frames, u)
+        entrar_usuario(frames, u,h_gadgets,update)
     else:
         #print('Usuario no existe o contraseña incorrecta')
         tk.messagebox.showerror("Error de login", "Usuario inexistente o contraseña incorrecta")
         pass
 
-def ingresar_usuario(frames):
+def ingresar_usuario(frames,h_gadgets = [],update = False):
     frame = frames["usuario"]
     l_nombre = tk.Label(frame, text="Nombre")
     l_nombre.grid(row = 0, column = 0)
@@ -139,10 +139,15 @@ def ingresar_usuario(frames):
     # n = nombre.get()
     # p = password.get()
 
-    btn1 = tk.Button(frame, text = "Ingresar", command = lambda: comparar_usuario(frames, nombre, password))
+    btn1 = tk.Button(frame, text = "Ingresar", command = lambda: comparar_usuario(frames, nombre, password,h_gadgets,update))
     btn1.grid(row=2, column=1)
-    btn2 = tk.Button(frame, text = "Crear nuevo", command = lambda: crear_usuario(frames, nombre, password))
+    btn2 = tk.Button(frame, text = "Crear nuevo", command = lambda: crear_usuario(frames, nombre, password,h_gadgets,update))
     btn2.grid(row = 2, column = 0)
+    
+    frames["aux"].grid_forget()#CARLOS
+    frames["aux"] = frame#CARLOS
+    frames["aux"].grid(row = 0, column = 1)#CARLOS
+
 
 # Se usa en create_option_buttons  FABIAN
 def ver_horario(frames):
@@ -236,7 +241,7 @@ def create_optionMenu_gadgets(frame: tk.Tk, gadgets: list, materias: list, week:
             new_options.grid(row = j + 1, column = i + 1)
 
 # Rellenar horas del horario (desde main)   FABIAN
-def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list):
+def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list,update):
     # Agregar materias a la lista "materias"
     materias = []
     for x in week.choices_materia[1:]:
@@ -257,7 +262,7 @@ def horario_fill(frame, gadgets: list, week, labels_days: list, labels_hrs: list
         new_label.grid(row = i + 1, column = 0)
 
     # Crear uptionMenu fields
-    create_optionMenu_gadgets(frame, gadgets, materias, week, update = False)
+    create_optionMenu_gadgets(frame, gadgets, materias, week, update)
 
 # Crear ventana que muestra el historial (desde create_option_buttons)   FABIAN
 def ver_historial(frames, vistos: vistos.ListaVistos,index = 0):
@@ -443,6 +448,9 @@ def create_option_buttons(frames: dict, week, gadgets, vistos, favo):
     # Favoritos
     favoritos = tk.Button(frames["opciones"], text = "Videos Favoritos", command = lambda: ver_favoritos(frames, favo)) #CARLOS
     favoritos.grid(row = 4, column = 0)#CARLOS
+    
+    userButton = tk.Button(frames["opciones"], text = "ingresar usuario", command = lambda: ingresar_usuario(frames,gadgets,True)) #CARLOS
+    userButton.grid(row = 5, column = 0)#CARLOS
 
 # ----- END INTERFAZ ----- #
 
