@@ -30,9 +30,9 @@ pip install pillow
 
 
 
-### En Linux
+### Ejecutar en linux
 python3 main.py
 
 
-### En Windows (con bash)
+### Ejecutar en Windows (con bash)
 python main.py
